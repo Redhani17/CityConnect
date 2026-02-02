@@ -6,6 +6,13 @@ export const submitComplaint = async (req, res) => {
     const { title, description, category, location } = req.body;
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+    if (req.user.role !== 'citizen') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only citizens can file complaints.',
+      });
+    }
+
     if (!title || !description || !category || !location) {
       return res.status(400).json({
         success: false,
@@ -39,7 +46,14 @@ export const submitComplaint = async (req, res) => {
 // Get User's Complaints (Citizen)
 export const getMyComplaints = async (req, res) => {
   try {
-    const complaints = await Complaint.find({ userId: req.user._id })
+    let query = { userId: req.user._id };
+
+    // If user is department, show complaints assigned to their department EXCLUSIVELY
+    if (req.user.role === 'department') {
+      query = { category: req.user.department };
+    }
+
+    const complaints = await Complaint.find(query)
       .sort({ createdAt: -1 })
       .populate('userId', 'name email');
 
@@ -115,6 +129,14 @@ export const updateComplaintStatus = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Complaint not found',
+      });
+    }
+
+    // Authorization check for department users
+    if (req.user.role === 'department' && complaint.category !== req.user.department) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only update complaints for your department.',
       });
     }
 

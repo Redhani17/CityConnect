@@ -13,6 +13,7 @@ import emergencyRoutes from './routes/emergency.routes.js';
 import chatbotRoutes from './routes/chatbot.routes.js';
 import announcementRoutes from './routes/announcement.routes.js';
 import jobRoutes from './routes/job.routes.js';
+import twilioRoutes from './routes/twilio.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -76,6 +77,7 @@ app.use('/api/emergency', emergencyRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/twilio', twilioRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -28,19 +28,17 @@ const Register = () => {
       return setError('Full Name should not contain numbers.');
     }
 
-    // 2. Email Validation (Format & Numeric Check)
+    // 2. Email Validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const localPart = formData.email.split('@')[0];
-
     if (!emailRegex.test(formData.email)) {
       return setError('Please enter a valid email address.');
     }
-
     if (/^\d+$/.test(localPart)) {
-      return setError('Email username cannot be purely numeric (e.g., 1234@example.com).');
+      return setError('Email username cannot be purely numeric.');
     }
 
-    // 3. Password Validation (Symbol, Digit, Alphabet)
+    // 3. Password Validation
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/;
     if (!passwordRegex.test(formData.password)) {
       return setError('Password must contain at least one letter, one digit, and one special character.');
@@ -48,20 +46,18 @@ const Register = () => {
 
     setLoading(true);
 
+    // If role is department, we default to 'Roads' to make the filtering work as per previous requirements
     const result = await register(
       formData.name,
       formData.email,
       formData.password,
-      formData.role
+      formData.role,
+      formData.role === 'department' ? 'Roads' : ''
     );
     setLoading(false);
 
     if (result.success) {
-      if (result.user?.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/citizen');
-      }
+      navigate('/citizen');
     } else {
       setError(result.message);
     }
@@ -94,7 +90,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   placeholder="e.g. John Doe"
-                  className="bg-light"
+                  className="bg-light shadow-none"
                 />
               </Form.Group>
 
@@ -107,7 +103,7 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   placeholder="name@example.com"
-                  className="bg-light"
+                  className="bg-light shadow-none"
                 />
               </Form.Group>
 
@@ -121,11 +117,9 @@ const Register = () => {
                   required
                   minLength={6}
                   placeholder="Minimum 6 characters"
-                  className="bg-light"
+                  className="bg-light shadow-none"
                 />
               </Form.Group>
-
-
 
               <Form.Group className="mb-4">
                 <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">I am a</Form.Label>
@@ -133,20 +127,21 @@ const Register = () => {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="bg-light"
+                  className="bg-light shadow-none"
+                  required
                 >
                   <option value="citizen">Citizen</option>
-                  <option value="department">Department Official</option>
+                  <option value="department">Department</option>
                 </Form.Select>
               </Form.Group>
 
               <Button
                 variant="primary"
                 type="submit"
-                className="w-100 py-2 mb-3 shadow-sm"
+                className="w-100 py-3 mb-3 shadow-sm fw-bold"
                 disabled={loading}
               >
-                {loading ? 'Creating Account...' : 'Register Now'}
+                {loading ? 'Registering...' : 'Register Account'}
               </Button>
             </Form>
           </Card.Body>

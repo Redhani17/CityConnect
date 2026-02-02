@@ -9,7 +9,7 @@ const generateToken = (userId) => {
 // Register User
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, department } = req.body;
 
     // Validation
     if (!name || !email || !password) {
@@ -34,6 +34,7 @@ export const register = async (req, res) => {
       email,
       password,
       role: role || 'citizen',
+      department: role === 'department' ? department : null,
     });
 
     const token = generateToken(user._id);

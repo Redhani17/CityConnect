@@ -16,6 +16,7 @@ const AdminAnnouncements = () => {
     category: 'General',
     date: '',
     location: '',
+    targetDepartment: '',
   });
   const [message, setMessage] = useState({ type: '', text: '' });
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -43,6 +44,7 @@ const AdminAnnouncements = () => {
       category: 'General',
       date: new Date().toISOString().split('T')[0],
       location: '',
+      targetDepartment: '',
     });
     setShowModal(true);
   };
@@ -55,6 +57,7 @@ const AdminAnnouncements = () => {
       category: announcement.category,
       date: announcement.date.split('T')[0],
       location: announcement.location || '',
+      targetDepartment: announcement.targetDepartment || '',
     });
     setShowModal(true);
   };
@@ -161,7 +164,10 @@ const AdminAnnouncements = () => {
                 </p>
                 <div className="mt-3 pt-3 border-top d-flex justify-content-between align-items-center text-muted small">
                   <div className="fw-bold"><i className="bi bi-calendar3 me-1"></i> {new Date(item.date).toLocaleDateString()}</div>
-                  <div><i className="bi bi-geo-alt me-1"></i> {item.location || 'All Zones'}</div>
+                  <div className="d-flex gap-3">
+                    {item.targetDepartment && <Badge bg="info" className="text-dark bg-opacity-10 border border-info border-opacity-25 px-2">Dept: {item.targetDepartment}</Badge>}
+                    <div><i className="bi bi-geo-alt me-1"></i> {item.location || 'All Zones'}</div>
+                  </div>
                 </div>
               </Card.Body>
             </Card>
@@ -243,6 +249,28 @@ const AdminAnnouncements = () => {
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   />
+                </Form.Group>
+              </Col>
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Target Department</Form.Label>
+                  <Form.Select
+                    value={formData.targetDepartment}
+                    className="bg-light py-3 border-light shadow-inner"
+                    onChange={(e) => setFormData({ ...formData, targetDepartment: e.target.value })}
+                  >
+                    <option value="">All Departments (Public)</option>
+                    <option value="Roads">Roads & Infrastructure</option>
+                    <option value="Water Supply">Water & Sanitation</option>
+                    <option value="Electricity">Public Lighting/Electricity</option>
+                    <option value="Waste Management">Solid Waste Management</option>
+                    <option value="Parks & Recreation">Parks & Greenery</option>
+                    <option value="Public Safety">Public Safety & Surveillance</option>
+                    <option value="Other">Other Miscellaneous</option>
+                  </Form.Select>
+                  <Form.Text className="text-muted">
+                    If selected, this announcement will only be visible to officials of this department (and Admins).
+                  </Form.Text>
                 </Form.Group>
               </Col>
             </Row>

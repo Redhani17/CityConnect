@@ -19,6 +19,6 @@ router.get('/my-complaints', authenticate, getMyComplaints);
 // Admin routes
 router.get('/all', authenticate, authorize('admin'), getAllComplaints);
 router.get('/:id', authenticate, getComplaint);
-router.put('/:id/status', authenticate, authorize('admin'), updateComplaintStatus);
+router.put('/:id/status', authenticate, authorize('admin', 'department'), updateComplaintStatus);
 
 export default router;

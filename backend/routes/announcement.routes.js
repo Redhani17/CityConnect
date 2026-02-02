@@ -15,9 +15,9 @@ const router = express.Router();
 router.get('/', authenticate, getAllAnnouncements);
 router.get('/:id', authenticate, getAnnouncement);
 
-// Admin routes
-router.post('/', authenticate, authorize('admin'), createAnnouncement);
-router.put('/:id', authenticate, authorize('admin'), updateAnnouncement);
-router.delete('/:id', authenticate, authorize('admin'), deleteAnnouncement);
+// Admin and Department routes
+router.post('/', authenticate, authorize('admin', 'department'), createAnnouncement);
+router.put('/:id', authenticate, authorize('admin', 'department'), updateAnnouncement);
+router.delete('/:id', authenticate, authorize('admin', 'department'), deleteAnnouncement);
 
 export default router;

@@ -81,18 +81,26 @@ const CitizenDashboard = () => {
       {/* WELCOME BANNER */}
       <div className="bg-white border rounded-3 p-4 mb-4 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-          <h2 className="h4 fw-bold text-primary mb-1">Welcome back, {user?.name}</h2>
+          <h2 className="h4 fw-bold text-primary mb-1">
+            {user?.role === 'department' ? `${user.department} Department Portal` : `Welcome back, ${user?.name}`}
+          </h2>
           <p className="text-secondary mb-0 small">
-            Citizen ID: <span className="font-mono text-dark fw-bold">{user?._id?.slice(-8).toUpperCase() || 'N/A'}</span> &bull; {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {user?.role === 'department'
+              ? `Official access for ${user.name}`
+              : `Citizen ID: ${user?._id?.slice(-8).toUpperCase() || 'N/A'}`} &bull; {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
         <div className="d-flex gap-2">
-          <Button as={Link} to="/complaints/submit" variant="primary" size="sm" className="fw-bold px-3">
-            <i className="bi bi-plus-circle me-2"></i>New Complaint
-          </Button>
-          <Button as={Link} to="/bills" variant="outline-primary" size="sm" className="fw-bold px-3">
-            <i className="bi bi-credit-card me-2"></i>Pay Bills
-          </Button>
+          {user?.role !== 'department' && (
+            <>
+              <Button as={Link} to="/complaints/submit" variant="primary" size="sm" className="fw-bold px-3">
+                <i className="bi bi-plus-circle me-2"></i>New Complaint
+              </Button>
+              <Button as={Link} to="/bills" variant="outline-primary" size="sm" className="fw-bold px-3">
+                <i className="bi bi-credit-card me-2"></i>Pay Bills
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

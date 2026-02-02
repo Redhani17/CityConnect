@@ -3,7 +3,7 @@ import Announcement from '../models/Announcement.model.js';
 // Create Announcement (Admin)
 export const createAnnouncement = async (req, res) => {
   try {
-    const { title, description, category, date, location } = req.body;
+    const { title, description, category, date, location, targetDepartment } = req.body;
 
     if (!title || !description || !date) {
       return res.status(400).json({
@@ -12,14 +12,23 @@ export const createAnnouncement = async (req, res) => {
       });
     }
 
-    const announcement = await Announcement.create({
+    const announcementData = {
       title,
       description,
       category: category || 'General',
       date,
       location,
       createdBy: req.user._id,
-    });
+    };
+
+    // If user is department, force the targetDepartment to their own
+    if (req.user.role === 'department') {
+      announcementData.targetDepartment = req.user.department;
+    } else {
+      announcementData.targetDepartment = targetDepartment || null;
+    }
+
+    const announcement = await Announcement.create(announcementData);
 
     res.status(201).json({
       success: true,
@@ -40,7 +49,12 @@ export const getAllAnnouncements = async (req, res) => {
   try {
     const { category } = req.query;
     const query = { isActive: true };
-    
+
+    // If user is department, filter EXCLUSIVELY by their department
+    if (req.user.role === 'department') {
+      query.targetDepartment = req.user.department;
+    }
+
     if (category) {
       query.category = category;
     }
@@ -102,13 +116,22 @@ export const updateAnnouncement = async (req, res) => {
       });
     }
 
-    const { title, description, category, date, location, isActive } = req.body;
+    // Authorization check for department users
+    if (req.user.role === 'department' && announcement.targetDepartment !== req.user.department) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only update announcements for your department.',
+      });
+    }
+
+    const { title, description, category, date, location, targetDepartment, isActive } = req.body;
 
     if (title) announcement.title = title;
     if (description) announcement.description = description;
     if (category) announcement.category = category;
     if (date) announcement.date = date;
     if (location !== undefined) announcement.location = location;
+    if (targetDepartment !== undefined) announcement.targetDepartment = targetDepartment;
     if (isActive !== undefined) announcement.isActive = isActive;
 
     await announcement.save();
@@ -136,6 +159,14 @@ export const deleteAnnouncement = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Announcement not found',
+      });
+    }
+
+    // Authorization check for department users
+    if (req.user.role === 'department' && announcement.targetDepartment !== req.user.department) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only delete announcements for your department.',
       });
     }
 

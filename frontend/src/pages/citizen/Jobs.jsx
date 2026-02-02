@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, Button, Badge, Card } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Badge, Card, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
@@ -9,6 +9,9 @@ const Jobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ department: '', location: '' });
+  const [callMessage, setCallMessage] = useState({ type: '', text: '' });
+  const [callingId, setCallingId] = useState(null);
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
@@ -35,6 +38,32 @@ const Jobs = () => {
     setFilters({ ...filters, [key]: value });
   };
 
+  const handleMakeCall = async (jobId, phoneNumber) => {
+    if (!phoneNumber) {
+      setCallMessage({ type: 'warning', text: 'No contact number available for this job.' });
+      return;
+    }
+
+    setCallingId(jobId);
+    setCallMessage({ type: '', text: '' });
+
+    try {
+      const response = await axios.post(`${API_URL}/twilio/call`, { phoneNumber });
+      if (response.data.success) {
+        setCallMessage({ type: 'success', text: `Call initiated to ${phoneNumber}!` });
+      }
+    } catch (error) {
+      setCallMessage({
+        type: 'danger',
+        text: error.response?.data?.message || 'Failed to connect call via Twilio.'
+      });
+    } finally {
+      setCallingId(null);
+      // Auto-hide message after 5 seconds
+      setTimeout(() => setCallMessage({ type: '', text: '' }), 5000);
+    }
+  };
+
   // Helper to get a random color for the "Tag" based on string
   const getTagColor = (str) => {
     const colors = ['bg-info', 'bg-success', 'bg-warning', 'bg-danger', 'bg-primary'];
@@ -49,6 +78,12 @@ const Jobs = () => {
     <Container className="py-4" style={{ maxWidth: '1400px' }}>
 
       <h2 className="mb-4 text-dark fw-normal opacity-75">Local Jobs & Opportunities</h2>
+
+      {callMessage.text && (
+        <Alert variant={callMessage.type} dismissible onClose={() => setCallMessage({ type: '', text: '' })}>
+          {callMessage.text}
+        </Alert>
+      )}
 
       {/* FILTERS SECTION */}
       <Card className="border-0 shadow-sm mb-4">
@@ -136,9 +171,16 @@ const Jobs = () => {
                   <Button
                     variant="outline-primary"
                     size="sm"
-                    className="px-3 py-1 rounded-1"
+                    className="px-3 py-1 rounded-1 d-flex align-items-center"
+                    disabled={callingId === job._id}
+                    onClick={() => handleMakeCall(job._id, job.contactPhone)}
                   >
-                    Call: {Math.floor(Math.random() * 9000000000) + 1000000000}
+                    {callingId === job._id ? (
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    ) : (
+                      <i className="bi bi-telephone-outbound me-2"></i>
+                    )}
+                    Call: {job.contactPhone || 'N/A'}
                   </Button>
                 </div>
               </Card.Body>

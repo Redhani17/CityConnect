@@ -3,9 +3,11 @@ import { Container, Card, Table, Badge, Button, Modal, Alert, Row, Col } from 'r
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Bills = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -68,10 +70,10 @@ const Bills = () => {
       <div className="text-center mb-5">
         <div className="d-inline-flex align-items-center border px-3 py-1 rounded-pill mb-3 bg-zinc-50">
           <span className="dot bg-success rounded-circle me-2" style={{ width: '8px', height: '8px' }}></span>
-          <small className="font-mono text-uppercase fw-bold">Secure Gateway v4.1</small>
+          <small className="font-mono text-uppercase fw-bold">{t('bills.secure_gateway')}</small>
         </div>
-        <h2 className="display-5 fw-bold tracking-tight">Utility Payments</h2>
-        <p className="text-secondary">Manage and settle your outstanding civic dues.</p>
+        <h2 className="display-5 fw-bold tracking-tight">{t('bills.title')}</h2>
+        <p className="text-secondary">{t('bills.subtitle')}</p>
       </div>
 
       {message.text && (
@@ -89,7 +91,7 @@ const Bills = () => {
       {bills.length === 0 ? (
         <div className="text-center py-5 bg-white rounded-4 border border-dashed">
           <i className="bi bi-wallet2 fs-1 text-muted opacity-50 mb-3"></i>
-          <p className="text-muted">No pending invoices found for this account.</p>
+          <p className="text-muted">{t('bills.no_invoices')}</p>
         </div>
       ) : (
         <Row className="g-4">
@@ -108,10 +110,10 @@ const Bills = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1">{bill.billType}</h5>
-                    <div className="font-mono small text-muted text-uppercase mb-1">Period: {bill.period}</div>
+                    <div className="font-mono small text-muted text-uppercase mb-1">{t('bills.period')}: {bill.period}</div>
                     <div className="d-flex align-items-center gap-2">
-                      <span className="badge bg-light text-dark border fw-normal">Due: {new Date(bill.dueDate).toLocaleDateString()}</span>
-                      {bill.status === 'Paid' && <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i className="bi bi-check2"></i> PAID</span>}
+                      <span className="badge bg-light text-dark border fw-normal">{t('bills.due')}: {new Date(bill.dueDate).toLocaleDateString()}</span>
+                      {bill.status === 'Paid' && <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i className="bi bi-check2"></i> {t('bills.paid')}</span>}
                     </div>
                   </div>
                 </div>
@@ -119,7 +121,7 @@ const Bills = () => {
                 {/* RIGHT: ACTION */}
                 <div className="text-end d-flex flex-column flex-md-row align-items-center gap-4 min-w-max">
                   <div className="text-end">
-                    <small className="text-muted d-block text-uppercase font-mono" style={{ fontSize: '0.65rem' }}>Total Amount</small>
+                    <small className="text-muted d-block text-uppercase font-mono" style={{ fontSize: '0.65rem' }}>{t('bills.amount')}</small>
                     <div className="fs-3 fw-bold font-mono tracking-tight">₹{bill.amount}</div>
                   </div>
 
@@ -129,11 +131,11 @@ const Bills = () => {
                       className="px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2"
                       onClick={() => handlePay(bill)}
                     >
-                      Pay Now <i className="bi bi-arrow-right"></i>
+                      {t('bills.pay_now')} <i className="bi bi-arrow-right"></i>
                     </Button>
                   ) : (
                     <Button variant="outline-secondary" disabled className="px-4 py-2 rounded-pill opacity-50">
-                      Receipt
+                      {t('bills.receipt')}
                     </Button>
                   )}
                 </div>
@@ -150,14 +152,14 @@ const Bills = () => {
             <div className="bg-success bg-opacity-10 text-success rounded-circle p-3 d-inline-block mb-3">
               <i className="bi bi-shield-lock-fill fs-3"></i>
             </div>
-            <h4 className="fw-bold">Secure Payment</h4>
-            <p className="text-muted small">Verify transaction details below</p>
+            <h4 className="fw-bold">{t('bills.secure_payment')}</h4>
+            <p className="text-muted small">{t('bills.verify_txn')}</p>
           </div>
 
           {selectedBill && (
             <div className="bg-light rounded-3 p-3 mb-4 font-mono small">
               <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">SERVICE</span>
+                <span className="text-muted">{t('bills.service')}</span>
                 <span className="fw-bold">{selectedBill.billType}</span>
               </div>
               <div className="d-flex justify-content-between mb-2">
@@ -177,10 +179,10 @@ const Bills = () => {
               {paymentLoading ? (
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               ) : (
-                <>Confirm & Pay ₹{selectedBill?.amount}</>
+                <>{t('bills.confirm_pay', { amount: selectedBill?.amount })}</>
               )}
             </Button>
-            <Button variant="link" className="text-muted text-decoration-none" onClick={() => setShowModal(false)}>Cancel Transaction</Button>
+            <Button variant="link" className="text-muted text-decoration-none" onClick={() => setShowModal(false)}>{t('navbar.logout').toLowerCase() === 'logout' ? 'Cancel Transaction' : 'Cancel Transaction'}</Button>
           </div>
         </div>
       </Modal>

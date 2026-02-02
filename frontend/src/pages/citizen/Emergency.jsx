@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Badge, ProgressBar } from 'react-bootstrap';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const Emergency = () => {
+  const { t } = useTranslation();
   const [sosSent, setSosSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState([]);
@@ -87,8 +89,8 @@ const Emergency = () => {
 
       {/* ALERT BANNER */}
       <Alert variant="danger" className="text-center shadow-sm border-danger">
-        <h4 className="alert-heading fw-bold"><i className="bi bi-exclamation-triangle-fill me-2"></i>EMERGENCY SERVICES</h4>
-        <p className="mb-0">Only use this page for life-threatening emergencies or urgent assistance.</p>
+        <h4 className="alert-heading fw-bold"><i className="bi bi-exclamation-triangle-fill me-2"></i>{t('emergency.title')}</h4>
+        <p className="mb-0">{t('emergency.warning')}</p>
       </Alert>
 
       <Row className="g-5 mt-2">
@@ -96,7 +98,7 @@ const Emergency = () => {
         <Col md={6} className="text-center">
           <Card className="h-100 border-0 shadow-sm bg-light">
             <Card.Body className="d-flex flex-column align-items-center justify-content-center py-5">
-              <h3 className="fw-bold text-dark mb-4">Request Immediate Help</h3>
+              <h3 className="fw-bold text-dark mb-4">{t('emergency.request_help')}</h3>
 
               <div className="position-relative mb-4" style={{ width: '200px', height: '200px' }}>
                 {/* Progress Ring Background */}
@@ -133,7 +135,7 @@ const Emergency = () => {
                   {loading ? <span className="spinner-border"></span> : (
                     <>
                       <i className={`bi ${sosSent ? 'bi-check-lg' : 'bi-broadcast'} fs-1`}></i>
-                      <span className="fs-3 fw-bold mt-1">{sosSent ? 'SENT' : 'SOS'}</span>
+                      <span className="fs-3 fw-bold mt-1">{sosSent ? t('emergency.sos_sent') : t('emergency.sos_button')}</span>
                     </>
                   )}
                 </Button>
@@ -141,11 +143,11 @@ const Emergency = () => {
 
               <div className="text-muted small mt-2 px-3">
                 {sosSent ? (
-                  <span className="text-success fw-bold">HELP IS ON THE WAY! A call has been placed.</span>
+                  <span className="text-success fw-bold">{t('emergency.help_on_way')}</span>
                 ) : isPressing ? (
-                  <span className="text-primary fw-bold">HOLDING... DON'T RELEASE ({Math.ceil((HOLD_DURATION - (holdProgress * HOLD_DURATION) / 100) / 1000)}s)</span>
+                  <span className="text-primary fw-bold">{t('emergency.holding')} ({Math.ceil((HOLD_DURATION - (holdProgress * HOLD_DURATION) / 100) / 1000)}s)</span>
                 ) : (
-                  "Hold button for 5 seconds to initiate emergency call"
+                  t('emergency.instruction')
                 )}
               </div>
             </Card.Body>
@@ -154,9 +156,9 @@ const Emergency = () => {
 
         {/* CONTACTS LIST */}
         <Col md={6}>
-          <h4 className="fw-bold mb-3 border-bottom pb-2">Emergency Contacts</h4>
+          <h4 className="fw-bold mb-3 border-bottom pb-2">{t('emergency.contacts')}</h4>
           <div className="d-flex flex-column gap-3">
-            {contacts.length === 0 && <p className="text-muted">Loading contacts...</p>}
+            {contacts.length === 0 && <p className="text-muted">Loading...</p>}
             {contacts.map((contact, idx) => (
               <a href={`tel:${contact.number}`} key={idx} className="text-decoration-none">
                 <Card className="border shadow-sm hover-shadow transition-all">

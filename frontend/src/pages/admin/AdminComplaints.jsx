@@ -17,6 +17,7 @@ const AdminComplaints = () => {
   });
   const [message, setMessage] = useState({ type: '', text: '' });
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const BASE_URL = API_URL.replace('/api', '');
 
   useEffect(() => {
     fetchComplaints();
@@ -169,6 +170,20 @@ const AdminComplaints = () => {
           <Modal.Body className="p-4">
             {selectedComplaint && (
               <div className="bg-light p-3 rounded-3 mb-4 border">
+                {selectedComplaint.imageUrl && (
+                  <div className="mb-4 rounded-3 overflow-hidden border shadow-sm bg-white">
+                    <img
+                      src={`${BASE_URL}${selectedComplaint.imageUrl}`}
+                      alt="Complaint Evidence"
+                      className="w-100 object-fit-contain"
+                      style={{ maxHeight: '350px' }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/800x400?text=Evidence+Image+Not+Found';
+                      }}
+                    />
+                  </div>
+                )}
                 <Row className="g-3">
                   <Col md={12}>
                     <label className="text-muted small fw-bold text-uppercase ls-1 d-block mb-1">Incident Detail</label>

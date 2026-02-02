@@ -12,6 +12,7 @@ const AdminDashboard = () => {
     pendingComplaints: 0,
     announcements: 0,
     jobs: 0,
+    feedback: 0,
   });
   const [loading, setLoading] = useState(true);
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -22,10 +23,11 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [complaintsRes, announcementsRes, jobsRes] = await Promise.all([
+      const [complaintsRes, announcementsRes, jobsRes, feedbackRes] = await Promise.all([
         axios.get(`${API_URL}/complaints/all`),
         axios.get(`${API_URL}/announcements`),
         axios.get(`${API_URL}/jobs`),
+        axios.get(`${API_URL}/feedback/all`),
       ]);
 
       const complaints = complaintsRes.data.data.complaints;
@@ -34,6 +36,7 @@ const AdminDashboard = () => {
         pendingComplaints: complaints.filter((c) => c.status === 'Pending').length,
         announcements: announcementsRes.data.data.announcements.length,
         jobs: jobsRes.data.data.jobs.length,
+        feedback: feedbackRes.data.data.feedback.length,
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -55,17 +58,11 @@ const AdminDashboard = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white border rounded-3 p-4 mb-5 shadow-sm d-flex justify-content-between align-items-center"
+        className="bg-white border rounded-3 p-4 mb-5 shadow-sm"
       >
-        <div>
-          <Badge bg="dark" className="mb-2 text-uppercase ls-1 px-3 py-2">Administrator Access</Badge>
-          <h2 className="h3 fw-bold text-dark mb-1">Government Management Portal</h2>
-          <p className="text-secondary small mb-0">System Overview & Command Center for Official {user?.name}</p>
-        </div>
-        <div className="text-end d-none d-md-block">
-          <div className="text-muted small fw-bold text-uppercase ls-1 mb-1">Server Status</div>
-          <Badge bg="success" className="rounded-pill px-3">ACTIVE / ENCRYPTED</Badge>
-        </div>
+        <div className="text-dark small fw-bold text-uppercase ls-2 mb-2">Admin Dashboard</div>
+        <h2 className="display-6 fw-bold text-dark mb-1">Welcome, {user?.name || 'Administrator'}</h2>
+        <p className="text-secondary mb-0">Operational Overview & Command center for your department.</p>
       </motion.div>
 
       {/* METRICS GRID */}
@@ -129,18 +126,18 @@ const AdminDashboard = () => {
 
         <Col lg={3} md={6}>
           <Card className="h-100 border-0 shadow-sm overflow-hidden">
-            <div className="bg-success py-1"></div>
+            <div className="bg-danger py-1"></div>
             <Card.Body className="p-4">
               <div className="d-flex justify-content-between align-items-start mb-3">
-                <div className="bg-success bg-opacity-10 p-2 rounded text-success">
-                  <i className="bi bi-briefcase fs-4"></i>
+                <div className="bg-danger bg-opacity-10 p-2 rounded text-danger">
+                  <i className="bi bi-chat-heart fs-4"></i>
                 </div>
-                <Badge bg="light" text="success" className="border">TENDER OPS</Badge>
+                <Badge bg="light" text="danger" className="border">LATEST UPDATES</Badge>
               </div>
-              <h6 className="text-muted small fw-bold text-uppercase ls-1">Job Postings</h6>
-              <h2 className="fw-bold text-dark mb-3">{stats.jobs}</h2>
-              <Button as={Link} to="/admin/jobs" variant="link" className="p-0 text-success fw-bold text-decoration-none small">
-                Create Listing <i className="bi bi-arrow-right small"></i>
+              <h6 className="text-muted small fw-bold text-uppercase ls-1">Citizen Feedback</h6>
+              <h2 className="fw-bold text-dark mb-3">{stats.feedback}</h2>
+              <Button as={Link} to="/admin/feedback" variant="link" className="p-0 text-danger fw-bold text-decoration-none small">
+                Read All <i className="bi bi-arrow-right small"></i>
               </Button>
             </Card.Body>
           </Card>
@@ -157,7 +154,7 @@ const AdminDashboard = () => {
             </Card.Header>
             <Card.Body className="p-4">
               <Row className="g-3">
-                <Col md={4}>
+                <Col md={3}>
                   <Button as={Link} to="/admin/complaints" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
                     <i className="bi bi-chat-left-dots fs-4 me-3 text-primary"></i>
                     <div>
@@ -166,7 +163,7 @@ const AdminDashboard = () => {
                     </div>
                   </Button>
                 </Col>
-                <Col md={4}>
+                <Col md={3}>
                   <Button as={Link} to="/admin/announcements" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
                     <i className="bi bi-megaphone fs-4 me-3 text-info"></i>
                     <div>
@@ -175,12 +172,21 @@ const AdminDashboard = () => {
                     </div>
                   </Button>
                 </Col>
-                <Col md={4}>
+                <Col md={3}>
                   <Button as={Link} to="/admin/jobs" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
                     <i className="bi bi-people fs-4 me-3 text-success"></i>
                     <div>
                       <div className="fw-bold small">Jobs & Tenders</div>
                       <div className="text-muted small" style={{ fontSize: '0.7rem' }}>Employment Board</div>
+                    </div>
+                  </Button>
+                </Col>
+                <Col md={3}>
+                  <Button as={Link} to="/admin/feedback" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
+                    <i className="bi bi-star fs-4 me-3 text-danger"></i>
+                    <div>
+                      <div className="fw-bold small">Citizen Feedback</div>
+                      <div className="text-muted small" style={{ fontSize: '0.7rem' }}>Portal Experience</div>
                     </div>
                   </Button>
                 </Col>

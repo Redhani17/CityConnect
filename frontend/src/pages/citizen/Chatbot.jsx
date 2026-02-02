@@ -3,13 +3,15 @@ import { Container, Card, Form, Button, ListGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Chatbot = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      text: 'Hello! I am your CityConnect AI Assistant. I can help with complaints, bills, or general queries. Type below!',
+      text: t('chatbot.welcome'),
     },
   ]);
   const [input, setInput] = useState('');
@@ -57,7 +59,7 @@ const Chatbot = () => {
     } catch (error) {
       const errorMessage = {
         type: 'bot',
-        text: 'System Error: Unable to process request. Please try again.',
+        text: t('chatbot.error'),
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -76,8 +78,8 @@ const Chatbot = () => {
         <div className="mx-auto rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mb-3 text-primary animate-pulse" style={{ width: '64px', height: '64px' }}>
           <i className="bi bi-robot fs-2"></i>
         </div>
-        <h2 className="fw-bold display-6">AI City Assistant</h2>
-        <p className="text-muted">Automated Support System v2.1</p>
+        <h2 className="fw-bold display-6">{t('chatbot.title')}</h2>
+        <p className="text-muted">{t('chatbot.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-4 shadow-lg border overflow-hidden d-flex flex-column" style={{ height: '70vh' }}>
@@ -111,7 +113,7 @@ const Chatbot = () => {
 
           {loading && (
             <div className="d-flex align-items-center gap-2 text-muted font-mono small ms-5">
-              <span className="spinner-border spinner-border-sm"></span> Processing...
+              <span className="spinner-border spinner-border-sm"></span> {t('chatbot.processing')}
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -134,7 +136,7 @@ const Chatbot = () => {
           <Form onSubmit={handleSend} className="d-flex gap-2">
             <Form.Control
               type="text"
-              placeholder="Ask about payments, schedules, or services..."
+              placeholder={t('chatbot.placeholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}

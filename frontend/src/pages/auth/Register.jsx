@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,23 +27,23 @@ const Register = () => {
 
     // 1. Name Validation (No numbers)
     if (/\d/.test(formData.name)) {
-      return setError('Full Name should not contain numbers.');
+      return setError(t('auth.register.name_error') || 'Full Name should not contain numbers.');
     }
 
     // 2. Email Validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const localPart = formData.email.split('@')[0];
     if (!emailRegex.test(formData.email)) {
-      return setError('Please enter a valid email address.');
+      return setError(t('auth.register.email_error') || 'Please enter a valid email address.');
     }
     if (/^\d+$/.test(localPart)) {
-      return setError('Email username cannot be purely numeric.');
+      return setError(t('auth.register.email_numeric_error') || 'Email username cannot be purely numeric.');
     }
 
     // 3. Password Validation
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/;
     if (!passwordRegex.test(formData.password)) {
-      return setError('Password must contain at least one letter, one digit, and one special character.');
+      return setError(t('auth.register.password_error') || 'Password must contain at least one letter, one digit, and one special character.');
     }
 
     setLoading(true);
@@ -67,8 +69,8 @@ const Register = () => {
     <div className="bg-light min-vh-100 d-flex align-items-center py-5">
       <Container style={{ maxWidth: '480px' }}>
         <div className="text-center mb-4">
-          <h2 className="fw-bold text-primary mb-1">Create Account</h2>
-          <p className="text-secondary small">Join thousands of citizens connected digitally.</p>
+          <h2 className="fw-bold text-primary mb-1">{t('auth.register.title')}</h2>
+          <p className="text-secondary small">{t('auth.register.subtitle')}</p>
         </div>
 
         <Card className="border-0 shadow-sm">
@@ -82,7 +84,7 @@ const Register = () => {
 
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Full Name</Form.Label>
+                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">{t('auth.register.name')}</Form.Label>
                 <Form.Control
                   type="text"
                   name="name"
@@ -95,7 +97,7 @@ const Register = () => {
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Email Address</Form.Label>
+                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">{t('auth.register.email')}</Form.Label>
                 <Form.Control
                   type="email"
                   name="email"
@@ -108,7 +110,7 @@ const Register = () => {
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Password</Form.Label>
+                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">{t('auth.register.password')}</Form.Label>
                 <Form.Control
                   type="password"
                   name="password"
@@ -116,13 +118,13 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   minLength={6}
-                  placeholder="Minimum 6 characters"
+                  placeholder="********"
                   className="bg-light shadow-none"
                 />
               </Form.Group>
 
               <Form.Group className="mb-4">
-                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">I am a</Form.Label>
+                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">{t('auth.register.role')}</Form.Label>
                 <Form.Select
                   name="role"
                   value={formData.role}
@@ -130,8 +132,8 @@ const Register = () => {
                   className="bg-light shadow-none"
                   required
                 >
-                  <option value="citizen">Citizen</option>
-                  <option value="department">Department</option>
+                  <option value="citizen">{t('auth.register.citizen')}</option>
+                  <option value="department">{t('auth.register.department')}</option>
                 </Form.Select>
               </Form.Group>
 
@@ -141,13 +143,13 @@ const Register = () => {
                 className="w-100 py-3 mb-3 shadow-sm fw-bold"
                 disabled={loading}
               >
-                {loading ? 'Registering...' : 'Register Account'}
+                {loading ? t('auth.register.loading') : t('auth.register.submit')}
               </Button>
             </Form>
           </Card.Body>
           <Card.Footer className="bg-light border-top p-3 text-center">
             <p className="small text-secondary mb-0">
-              Already have an account? <Link to="/login" className="fw-semibold text-primary text-decoration-none">Sign In</Link>
+              {t('auth.register.has_account')} <Link to="/login" className="fw-semibold text-primary text-decoration-none">{t('auth.register.login_link')}</Link>
             </p>
           </Card.Footer>
         </Card>

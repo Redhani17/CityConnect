@@ -19,6 +19,7 @@ import Announcements from './pages/citizen/Announcements';
 import Jobs from './pages/citizen/Jobs';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminJobs from './pages/admin/AdminJobs';
+import AdminFeedback from './pages/admin/AdminFeedback';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
@@ -127,6 +128,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminJobs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/feedback"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminFeedback />
                   </ProtectedRoute>
                 }
               />

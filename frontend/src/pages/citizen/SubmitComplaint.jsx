@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert, Row, Col } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const SubmitComplaint = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -11,6 +13,7 @@ const SubmitComplaint = () => {
     location: '',
   });
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,15 @@ const SubmitComplaint = () => {
   };
 
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -51,7 +62,7 @@ const SubmitComplaint = () => {
         }
       );
 
-      setSuccess('Complaint submitted successfully!');
+      setSuccess(t('complaints.success'));
       setTimeout(() => {
         navigate('/complaints');
       }, 2000);
@@ -73,8 +84,8 @@ const SubmitComplaint = () => {
       </nav>
 
       <div className="mb-4">
-        <h2 className="fw-bold text-dark mb-1">File a Formal Grievance</h2>
-        <p className="text-secondary small">Your submission will be assigned to the relevant municipal department for resolution.</p>
+        <h2 className="fw-bold text-dark mb-1">{t('complaints.submit_title')}</h2>
+        <p className="text-secondary small">{t('complaints.submit_subtitle')}</p>
       </div>
 
       <Card className="border-0 shadow-sm overflow-hidden">
@@ -92,11 +103,11 @@ const SubmitComplaint = () => {
             <Row className="g-4">
               <Col md={12}>
                 <Form.Group>
-                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">Complaint Title</Form.Label>
+                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">{t('complaints.form_title')}</Form.Label>
                   <Form.Control
                     type="text"
                     name="title"
-                    placeholder="Briefly state the issue (e.g., Streetlight failure in Block 4)"
+                    placeholder={t('complaints.form_title_placeholder')}
                     className="bg-light py-3 border-light shadow-inner"
                     value={formData.title}
                     onChange={handleChange}
@@ -107,7 +118,7 @@ const SubmitComplaint = () => {
 
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">Category</Form.Label>
+                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">{t('complaints.form_category')}</Form.Label>
                   <Form.Select
                     name="category"
                     className="bg-light py-3 border-light shadow-inner"
@@ -129,7 +140,7 @@ const SubmitComplaint = () => {
 
               <Col md={6}>
                 <Form.Group>
-                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">Specific Location</Form.Label>
+                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">{t('complaints.form_location')}</Form.Label>
                   <Form.Control
                     type="text"
                     name="location"
@@ -144,7 +155,7 @@ const SubmitComplaint = () => {
 
               <Col md={12}>
                 <Form.Group>
-                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">Detailed Description</Form.Label>
+                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">{t('complaints.form_desc')}</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={6}
@@ -160,17 +171,44 @@ const SubmitComplaint = () => {
 
               <Col md={12}>
                 <Form.Group className="mb-2">
-                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">Supporting Image (Optional)</Form.Label>
-                  <div className="border border-dashed rounded-3 p-4 bg-light text-center">
-                    <i className="bi bi-cloud-upload fs-2 text-primary mb-2 d-inline-block"></i>
-                    <Form.Control
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="form-control-sm"
-                    />
-                    <div className="mt-2 small text-muted">Upload an image of the concern (Max 5MB)</div>
-                  </div>
+                  <Form.Label className="small fw-bold text-uppercase text-secondary ls-1">{t('complaints.form_image')}</Form.Label>
+
+                  {imagePreview ? (
+                    <div className="position-relative">
+                      <div className="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="object-fit-cover w-100 h-100"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-dark btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow"
+                        onClick={() => {
+                          setImage(null);
+                          setImagePreview(null);
+                        }}
+                        aria-label="Remove image"
+                        style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="border border-dashed rounded-3 p-4 bg-light text-center cursor-pointer position-relative hover-shadow transition-all">
+                      <i className="bi bi-images fs-1 text-primary mb-3 d-inline-block opacity-75"></i>
+                      <div className="fw-bold text-dark mb-1">Add Photo</div>
+                      <div className="small text-muted mb-3">Share a photo of the issue</div>
+                      <Form.Control
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </div>
+                  )}
                 </Form.Group>
               </Col>
 
@@ -182,7 +220,7 @@ const SubmitComplaint = () => {
                     className="px-5 py-3 fw-bold shadow-sm"
                     disabled={loading}
                   >
-                    {loading ? 'Submitting...' : 'Lodge Official Complaint'}
+                    {loading ? 'Submitting...' : t('complaints.form_submit')}
                   </Button>
                   <Button
                     as={Link}
@@ -190,7 +228,7 @@ const SubmitComplaint = () => {
                     variant="light"
                     className="px-4 py-3 text-secondary border fw-medium"
                   >
-                    Cancel
+                    {t('complaints.form_cancel')}
                   </Button>
                 </div>
               </Col>

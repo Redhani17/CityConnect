@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,8 +39,8 @@ const Login = () => {
           <div className="bg-white p-3 rounded shadow-sm d-inline-block mb-3 border">
             <i className="bi bi-bank2 fs-2 text-primary"></i>
           </div>
-          <h2 className="fw-bold text-primary mb-1">Welcome Back</h2>
-          <p className="text-secondary small">Sign in to your citizen dashboard</p>
+          <h2 className="fw-bold text-primary mb-1">{t('auth.login.title')}</h2>
+          <p className="text-secondary small">{t('auth.login.subtitle')}</p>
         </div>
 
         <Card className="border-0 shadow-sm">
@@ -52,7 +54,7 @@ const Login = () => {
 
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-4">
-                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Email Address</Form.Label>
+                <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">{t('auth.login.email')}</Form.Label>
                 <Form.Control
                   type="email"
                   value={email}
@@ -65,15 +67,15 @@ const Login = () => {
 
               <Form.Group className="mb-4">
                 <div className="d-flex justify-content-between align-items-center mb-1">
-                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1 mb-0">Password</Form.Label>
-                  <a href="#" className="small text-decoration-none text-primary fw-semibold">Forgot?</a>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1 mb-0">{t('auth.login.password')}</Form.Label>
+                  <a href="#" className="small text-decoration-none text-primary fw-semibold">{t('auth.login.forgot')}</a>
                 </div>
                 <Form.Control
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter your password"
+                  placeholder="********"
                   className="bg-light"
                 />
               </Form.Group>
@@ -84,23 +86,23 @@ const Login = () => {
                 className="w-100 py-2 mb-3 shadow-sm"
                 disabled={loading}
               >
-                {loading ? 'Authenticating...' : 'Sign In'}
+                {loading ? t('auth.login.loading') : t('auth.login.submit')}
               </Button>
             </Form>
           </Card.Body>
           <Card.Footer className="bg-light border-top p-3 text-center">
             <p className="small text-secondary mb-0">
-              Don't have an account? <Link to="/register" className="fw-semibold text-primary text-decoration-none">Register Now</Link>
+              {t('auth.login.no_account')} <Link to="/register" className="fw-semibold text-primary text-decoration-none">{t('auth.login.register_link')}</Link>
             </p>
           </Card.Footer>
         </Card>
 
         <div className="text-center mt-4">
-          <small className="text-muted d-block">&copy; 2024 CityConnect Government Portal</small>
+          <small className="text-muted d-block">&copy; {new Date().getFullYear()} CityConnect Government Portal</small>
           <div className="d-flex justify-content-center gap-3 mt-2">
-            <a href="#" className="text-secondary small text-decoration-none">Privacy</a>
-            <a href="#" className="text-secondary small text-decoration-none">Terms</a>
-            <a href="#" className="text-secondary small text-decoration-none">Help</a>
+            <a href="#" className="text-secondary small text-decoration-none">{t('footer.privacy')}</a>
+            <a href="#" className="text-secondary small text-decoration-none">{t('footer.terms')}</a>
+            <a href="#" className="text-secondary small text-decoration-none">{t('landing.help.ask')}</a>
           </div>
         </div>
       </Container>

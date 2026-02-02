@@ -3,9 +3,11 @@ import { Container, Row, Col, Form, Button, Badge, Card, Alert } from 'react-boo
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Jobs = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ department: '', location: '' });
@@ -77,7 +79,7 @@ const Jobs = () => {
   return (
     <Container className="py-4" style={{ maxWidth: '1400px' }}>
 
-      <h2 className="mb-4 text-dark fw-normal opacity-75">Local Jobs & Opportunities</h2>
+      <h2 className="mb-4 text-dark fw-normal opacity-75">{t('jobs.title')}</h2>
 
       {callMessage.text && (
         <Alert variant={callMessage.type} dismissible onClose={() => setCallMessage({ type: '', text: '' })}>
@@ -91,10 +93,10 @@ const Jobs = () => {
           <Row className="g-3 align-items-end">
             <Col md={5}>
               <Form.Group>
-                <Form.Label className="text-muted small mb-1">Department</Form.Label>
+                <Form.Label className="text-muted small mb-1">{t('jobs.department')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Filter by department"
+                  placeholder={t('jobs.department')}
                   className="py-2"
                   value={filters.department}
                   onChange={(e) => handleFilterChange('department', e.target.value)}
@@ -103,10 +105,10 @@ const Jobs = () => {
             </Col>
             <Col md={5}>
               <Form.Group>
-                <Form.Label className="text-muted small mb-1">Location</Form.Label>
+                <Form.Label className="text-muted small mb-1">{t('jobs.location')}</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Filter by location"
+                  placeholder={t('jobs.location')}
                   className="py-2"
                   value={filters.location}
                   onChange={(e) => handleFilterChange('location', e.target.value)}
@@ -119,7 +121,7 @@ const Jobs = () => {
                 className="w-100 py-2 bg-secondary text-white border-0"
                 onClick={() => setFilters({ department: '', location: '' })}
               >
-                Clear Filters
+                {t('jobs.clear_filters')}
               </Button>
             </Col>
           </Row>
@@ -146,14 +148,14 @@ const Jobs = () => {
 
                 <div className="mb-3">
                   <div className="fw-bold text-dark small mb-1">
-                    Location: <span className="fw-normal text-secondary">{job.location}</span>
+                    {t('jobs.location')}: <span className="fw-normal text-secondary">{job.location}</span>
                   </div>
                   <div className="fw-bold text-dark small mb-2">
-                    Salary: <span className="fw-normal text-secondary">{job.salary}</span>
+                    {t('jobs.salary')}: <span className="fw-normal text-secondary">{job.salary}</span>
                   </div>
                   {job.requirements && (
                     <div className="fw-bold text-dark small">
-                      Requirements: <span className="fw-normal text-secondary">{job.requirements}</span>
+                      {t('jobs.requirements')}: <span className="fw-normal text-secondary">{job.requirements}</span>
                     </div>
                   )}
                 </div>
@@ -166,7 +168,7 @@ const Jobs = () => {
                     style={{ backgroundColor: '#0d6efd' }}
                     href={`mailto:${job.contactEmail}`}
                   >
-                    Contact: {job.contactEmail}
+                    {t('jobs.contact')}: {job.contactEmail}
                   </Button>
                   <Button
                     variant="outline-primary"
@@ -180,7 +182,7 @@ const Jobs = () => {
                     ) : (
                       <i className="bi bi-telephone-outbound me-2"></i>
                     )}
-                    Call: {job.contactPhone || 'N/A'}
+                    {t('jobs.call')}: {job.contactPhone || 'N/A'}
                   </Button>
                 </div>
               </Card.Body>
@@ -191,7 +193,7 @@ const Jobs = () => {
         {jobs.length === 0 && !loading && (
           <Col xs={12}>
             <div className="text-center py-5 text-muted">
-              No jobs found matching your criteria.
+              {t('jobs.no_jobs')}
             </div>
           </Col>
         )}

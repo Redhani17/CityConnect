@@ -3,9 +3,11 @@ import { Container, Row, Col, Form, Badge, Card, Button, Modal, Alert } from 're
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Announcements = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
@@ -112,8 +114,8 @@ const Announcements = () => {
 
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 border-bottom pb-4">
         <div>
-          <h2 className="fw-bold text-dark mb-1">Municipal Notifications</h2>
-          <p className="text-secondary small mb-0">Stay updated with official city notices, events, and emergency alerts.</p>
+          <h2 className="fw-bold text-dark mb-1">{t('announcements.title')}</h2>
+          <p className="text-secondary small mb-0">{t('announcements.subtitle')}</p>
         </div>
         <div className="mt-4 mt-md-0 d-flex gap-3 align-items-center">
           {user?.role === 'department' && (
@@ -122,17 +124,17 @@ const Announcements = () => {
             </Button>
           )}
           <div className="d-flex align-items-center gap-3">
-            <span className="small text-muted text-nowrap fw-bold text-uppercase ls-1 d-none d-lg-inline">Filter:</span>
+            <span className="small text-muted text-nowrap fw-bold text-uppercase ls-1 d-none d-lg-inline">{t('announcements.filter')}</span>
             <Form.Select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="bg-white border-subtle shadow-sm py-2 px-3 fw-medium"
               style={{ minWidth: '180px', borderRadius: '8px' }}
             >
-              <option value="">All Notifications</option>
-              <option value="Event">📅 Public Events</option>
-              <option value="Notice">📢 Official Notices</option>
-              <option value="Alert">🚨 Safety Alerts</option>
+              <option value="">{t('announcements.all')}</option>
+              <option value="Event">📅 {t('announcements.events')}</option>
+              <option value="Notice">📢 {t('announcements.notices')}</option>
+              <option value="Alert">🚨 {t('announcements.alerts')}</option>
             </Form.Select>
           </div>
         </div>
@@ -151,7 +153,7 @@ const Announcements = () => {
 
       {announcements.length === 0 ? (
         <div className="text-center py-5 bg-light rounded-4 border border-dashed">
-          <p className="text-muted mb-0">No active broadcasts found {filter ? 'in this category' : ''}.</p>
+          <p className="text-muted mb-0">{t('announcements.no_broadcasts')}</p>
         </div>
       ) : (
         <Row className="g-4">

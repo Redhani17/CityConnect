@@ -31,19 +31,42 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log('✅ MongoDB Atlas connected successfully');
-  })
-  .catch((error) => {
-    console.error('❌ MongoDB connection error:', error.message);
-    process.exit(1);
-  });
+// MongoDB Connection with retry and local fallback
+async function connectWithRetry() {
+  const atlasUri = process.env.MONGODB_URI;
+  const localUri = 'mongodb://127.0.0.1:27017/cityconnect';
+  const maxRetries = 3;
+
+  // Try Atlas first (if provided)
+  if (atlasUri) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await mongoose.connect(atlasUri);
+        console.log('✅ MongoDB Atlas connected successfully');
+        return;
+      } catch (err) {
+        console.error(`Attempt ${attempt} - MongoDB Atlas connection error:`, err.message);
+        if (attempt < maxRetries) {
+          await new Promise((res) => setTimeout(res, 3000));
+        }
+      }
+    }
+    console.warn('⚠️ Unable to connect to MongoDB Atlas after multiple attempts.');
+  }
+
+  // Fallback: try local MongoDB
+  try {
+    await mongoose.connect(localUri);
+    console.log('✅ Connected to local MongoDB fallback');
+    return;
+  } catch (err) {
+    console.error('❌ Local MongoDB connection error:', err.message);
+  }
+
+  console.error('❌ All MongoDB connection attempts failed. If you intended to use Atlas, ensure your current IP is whitelisted and credentials are correct.');
+}
+
+connectWithRetry();
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -57,6 +80,42 @@ app.use('/api/jobs', jobRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'CityConnect API is running' });
+});
+
+// DB status endpoint: reports which DB we're connected to and counts for key collections
+import User from './models/User.model.js';
+import Complaint from './models/Complaint.model.js';
+import Announcement from './models/Announcement.model.js';
+
+app.get('/api/dbstatus', async (req, res) => {
+  try {
+    const conn = mongoose.connection;
+    const stateMap = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting',
+    };
+
+    const dbInfo = {
+      readyState: conn.readyState,
+      state: stateMap[conn.readyState] || 'unknown',
+      host: conn.host || null,
+      port: conn.port || null,
+      name: conn.name || null,
+    };
+
+    // Get counts (safe if collections don't exist yet)
+    const [usersCount, complaintsCount, announcementsCount] = await Promise.all([
+      User.countDocuments().catch(() => 0),
+      Complaint.countDocuments().catch(() => 0),
+      Announcement.countDocuments().catch(() => 0),
+    ]);
+
+    res.json({ success: true, db: dbInfo, counts: { users: usersCount, complaints: complaintsCount, announcements: announcementsCount } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 // Error handling middleware

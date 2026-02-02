@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Card, Form, Button, ListGroup } from 'react-bootstrap';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 
 const Chatbot = () => {
@@ -8,7 +9,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      text: 'Hello! I\'m your CityConnect assistant. How can I help you today?',
+      text: 'Hello! I am your CityConnect AI Assistant. I can help with complaints, bills, or general queries. Type below!',
     },
   ]);
   const [input, setInput] = useState('');
@@ -56,7 +57,7 @@ const Chatbot = () => {
     } catch (error) {
       const errorMessage = {
         type: 'bot',
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: 'System Error: Unable to process request. Please try again.',
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -69,66 +70,85 @@ const Chatbot = () => {
   };
 
   return (
-    <Container className="mt-4" style={{ maxWidth: '800px' }}>
-      <h2 className="mb-4">CityConnect Chatbot</h2>
-      <Card>
-        <Card.Header>Chat with Assistant</Card.Header>
-        <Card.Body style={{ height: '500px', overflowY: 'auto' }}>
-          <div className="chat-messages">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`chat-message ${
-                  msg.type === 'user' ? 'chat-user' : 'chat-bot'
-                }`}
-              >
+    <Container className="py-5" style={{ maxWidth: '900px' }}>
+
+      <div className="text-center mb-4">
+        <div className="mx-auto rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mb-3 text-primary animate-pulse" style={{ width: '64px', height: '64px' }}>
+          <i className="bi bi-robot fs-2"></i>
+        </div>
+        <h2 className="fw-bold display-6">AI City Assistant</h2>
+        <p className="text-muted">Automated Support System v2.1</p>
+      </div>
+
+      <div className="bg-white rounded-4 shadow-lg border overflow-hidden d-flex flex-column" style={{ height: '70vh' }}>
+
+        {/* CHAT WINDOW */}
+        <div className="flex-grow-1 p-4 overflow-auto bg-zinc-50" style={{ backgroundColor: '#f8fafc' }}>
+          {messages.map((msg, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={index}
+              className={`d-flex mb-3 ${msg.type === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
+            >
+              {msg.type === 'bot' && (
+                <div className="me-2 rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style={{ width: '32px', height: '32px' }}>
+                  <i className="bi bi-robot small"></i>
+                </div>
+              )}
+
+              <div className={`p-3 rounded-4 shadow-sm ${msg.type === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-white text-dark border rounded-tl-none'}`} style={{ maxWidth: '80%' }}>
                 {msg.text}
               </div>
-            ))}
-            {loading && (
-              <div className="chat-message chat-bot">
-                <div className="spinner-border spinner-border-sm" role="status">
-                  <span className="visually-hidden">Loading...</span>
+
+              {msg.type === 'user' && (
+                <div className="ms-2 rounded-circle bg-dark text-white d-flex align-items-center justify-content-center shadow-sm" style={{ width: '32px', height: '32px' }}>
+                  <i className="bi bi-person small"></i>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </Card.Body>
-        <Card.Footer>
-          {suggestions.length > 0 && (
-            <div className="mb-2">
-              <small className="text-muted">Quick suggestions:</small>
-              <div className="d-flex flex-wrap gap-2 mt-2">
-                {suggestions.map((suggestion, index) => (
-                  <Button
-                    key={index}
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    {suggestion}
-                  </Button>
-                ))}
-              </div>
+              )}
+            </motion.div>
+          ))}
+
+          {loading && (
+            <div className="d-flex align-items-center gap-2 text-muted font-mono small ms-5">
+              <span className="spinner-border spinner-border-sm"></span> Processing...
             </div>
           )}
-          <Form onSubmit={handleSend}>
-            <div className="d-flex gap-2">
-              <Form.Control
-                type="text"
-                placeholder="Type your message..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                disabled={loading}
-              />
-              <Button type="submit" disabled={loading || !input.trim()}>
-                Send
-              </Button>
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* INPUT AREA */}
+        <div className="p-4 bg-white border-top">
+
+          {/* SUGGESTIONS */}
+          {suggestions.length > 0 && (
+            <div className="mb-3 d-flex flex-wrap gap-2">
+              {suggestions.map((s, idx) => (
+                <button key={idx} onClick={() => handleSuggestionClick(s)} className="btn btn-sm btn-outline-secondary rounded-pill font-mono" style={{ fontSize: '0.75rem' }}>
+                  {s}
+                </button>
+              ))}
             </div>
+          )}
+
+          <Form onSubmit={handleSend} className="d-flex gap-2">
+            <Form.Control
+              type="text"
+              placeholder="Ask about payments, schedules, or services..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={loading}
+              className="rounded-pill py-3 px-4 border-light bg-light shadow-inner"
+              style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}
+            />
+            <Button type="submit" variant="primary" className="rounded-circle d-flex align-items-center justify-content-center shadow-md" style={{ width: '54px', height: '54px' }} disabled={loading || !input.trim()}>
+              <i className="bi bi-send-fill"></i>
+            </Button>
           </Form>
-        </Card.Footer>
-      </Card>
+        </div>
+
+      </div>
+
     </Container>
   );
 };

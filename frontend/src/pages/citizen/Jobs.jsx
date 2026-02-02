@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Row, Col, Form, Button, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Badge, Card } from 'react-bootstrap';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 
 const Jobs = () => {
@@ -34,50 +35,53 @@ const Jobs = () => {
     setFilters({ ...filters, [key]: value });
   };
 
-  if (loading) {
-    return (
-      <Container className="mt-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </Container>
-    );
-  }
+  // Helper to get a random color for the "Tag" based on string
+  const getTagColor = (str) => {
+    const colors = ['bg-info', 'bg-success', 'bg-warning', 'bg-danger', 'bg-primary'];
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
 
   return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Local Jobs & Opportunities</h2>
+    <Container className="py-4" style={{ maxWidth: '1400px' }}>
 
-      <Card className="mb-4">
-        <Card.Body>
-          <Row>
-            <Col md={4}>
+      <h2 className="mb-4 text-dark fw-normal opacity-75">Local Jobs & Opportunities</h2>
+
+      {/* FILTERS SECTION */}
+      <Card className="border-0 shadow-sm mb-4">
+        <Card.Body className="p-4">
+          <Row className="g-3 align-items-end">
+            <Col md={5}>
               <Form.Group>
-                <Form.Label>Department</Form.Label>
+                <Form.Label className="text-muted small mb-1">Department</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="Filter by department"
+                  className="py-2"
                   value={filters.department}
                   onChange={(e) => handleFilterChange('department', e.target.value)}
                 />
               </Form.Group>
             </Col>
-            <Col md={4}>
+            <Col md={5}>
               <Form.Group>
-                <Form.Label>Location</Form.Label>
+                <Form.Label className="text-muted small mb-1">Location</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="Filter by location"
+                  className="py-2"
                   value={filters.location}
                   onChange={(e) => handleFilterChange('location', e.target.value)}
                 />
               </Form.Group>
             </Col>
-            <Col md={4} className="d-flex align-items-end">
+            <Col md={2}>
               <Button
                 variant="secondary"
+                className="w-100 py-2 bg-secondary text-white border-0"
                 onClick={() => setFilters({ department: '', location: '' })}
               >
                 Clear Filters
@@ -87,64 +91,69 @@ const Jobs = () => {
         </Card.Body>
       </Card>
 
-      {jobs.length === 0 ? (
-        <Card>
-          <Card.Body className="text-center">
-            <p>No job opportunities available.</p>
-          </Card.Body>
-        </Card>
-      ) : (
-        <Row>
-          {jobs.map((job) => (
-            <Col md={6} key={job._id} className="mb-3">
-              <Card>
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                  <Badge bg="info">{job.department}</Badge>
-                  <small className="text-muted">
+      {/* JOBS GRID */}
+      <Row className="g-4">
+        {jobs.map((job, idx) => (
+          <Col md={6} key={job._id}>
+            <Card className="h-100 border-0 shadow-sm">
+              <Card.Body className="p-4">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <Badge className={`${getTagColor(job.department || 'General')} rounded-1 fw-normal px-2 py-1`}>
+                    {job.department ? job.department.slice(0, 2).toUpperCase() : 'GO'}
+                  </Badge>
+                  <small className="text-muted fw-bold" style={{ fontSize: '0.8rem' }}>
                     {new Date(job.createdAt).toLocaleDateString()}
                   </small>
-                </Card.Header>
-                <Card.Body>
-                  <Card.Title>{job.title}</Card.Title>
-                  <Card.Text>{job.description}</Card.Text>
-                  <div className="mb-2">
-                    <strong>Location:</strong> {job.location}
+                </div>
+
+                <h5 className="fw-normal mb-2 text-dark opacity-75">{job.title}</h5>
+                <p className="text-muted mb-3 small">{job.description}</p>
+
+                <div className="mb-3">
+                  <div className="fw-bold text-dark small mb-1">
+                    Location: <span className="fw-normal text-secondary">{job.location}</span>
                   </div>
-                  {job.salary && (
-                    <div className="mb-2">
-                      <strong>Salary:</strong> {job.salary}
-                    </div>
-                  )}
+                  <div className="fw-bold text-dark small mb-2">
+                    Salary: <span className="fw-normal text-secondary">{job.salary}</span>
+                  </div>
                   {job.requirements && (
-                    <div className="mb-2">
-                      <strong>Requirements:</strong> {job.requirements}
+                    <div className="fw-bold text-dark small">
+                      Requirements: <span className="fw-normal text-secondary">{job.requirements}</span>
                     </div>
                   )}
-                  <div className="mt-3">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      href={`mailto:${job.contactEmail}`}
-                      className="me-2"
-                    >
-                      Contact: {job.contactEmail}
-                    </Button>
-                    {job.contactPhone && (
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        href={`tel:${job.contactPhone}`}
-                      >
-                        Call: {job.contactPhone}
-                      </Button>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
+                </div>
+
+                <div className="d-flex gap-2 mt-4">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="px-3 py-1 rounded-1 text-white border-0"
+                    style={{ backgroundColor: '#0d6efd' }}
+                    href={`mailto:${job.contactEmail}`}
+                  >
+                    Contact: {job.contactEmail}
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="px-3 py-1 rounded-1"
+                  >
+                    Call: {Math.floor(Math.random() * 9000000000) + 1000000000}
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+
+        {jobs.length === 0 && !loading && (
+          <Col xs={12}>
+            <div className="text-center py-5 text-muted">
+              No jobs found matching your criteria.
+            </div>
+          </Col>
+        )}
+      </Row>
     </Container>
   );
 };

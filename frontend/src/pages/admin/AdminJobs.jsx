@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Card, Button, Row, Col, Modal, Form, Alert, Badge } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const AdminJobs = () => {
   const { user } = useAuth();
@@ -74,55 +75,55 @@ const AdminJobs = () => {
     try {
       if (editing) {
         await axios.put(`${API_URL}/jobs/${editing._id}`, formData);
-        setMessage({ type: 'success', text: 'Job updated successfully!' });
+        setMessage({ type: 'success', text: 'Tender record updated successfully.' });
       } else {
         await axios.post(`${API_URL}/jobs`, formData);
-        setMessage({ type: 'success', text: 'Job posted successfully!' });
+        setMessage({ type: 'success', text: 'New employment opportunity published.' });
       }
       setShowModal(false);
       fetchJobs();
     } catch (error) {
       setMessage({
         type: 'danger',
-        text: error.response?.data?.message || 'Operation failed',
+        text: error.response?.data?.message || 'Transaction failed',
       });
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this job posting?')) {
+    if (window.confirm('Remove this job posting from the public board?')) {
       try {
         await axios.delete(`${API_URL}/jobs/${id}`);
-        setMessage({ type: 'success', text: 'Job deleted successfully!' });
+        setMessage({ type: 'success', text: 'Posting successfully archived/removed.' });
         fetchJobs();
       } catch (error) {
         setMessage({
           type: 'danger',
-          text: error.response?.data?.message || 'Failed to delete',
+          text: error.response?.data?.message || 'Failed to remove posting',
         });
       }
     }
   };
 
-  if (loading) {
-    return (
-      <Container className="mt-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </Container>
-    );
-  }
+  if (loading) return (
+    <Container className="py-5 text-center">
+      <div className="spinner-border text-primary mb-3"></div>
+      <p className="text-secondary fw-medium">Retrieving Employment Records...</p>
+    </Container>
+  );
 
   return (
-    <Container className="mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Manage Job Postings</h2>
-        <Button variant="primary" onClick={handleCreate}>
-          Post New Job
-        </Button>
+    <Container className="py-4" style={{ maxWidth: '1400px' }}>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-end mb-4 border-bottom pb-4">
+        <div>
+          <h2 className="fw-bold text-dark mb-1">Employment Board Ops</h2>
+          <p className="text-secondary small mb-0">Manage municipal job postings, government contracts, and development tenders.</p>
+        </div>
+        <div className="mt-4 mt-md-0">
+          <Button variant="success" className="fw-bold px-4 py-2 shadow-sm text-white border-0" onClick={handleCreate}>
+            <i className="bi bi-briefcase me-2"></i> Post New Role
+          </Button>
+        </div>
       </div>
 
       {message.text && (
@@ -130,168 +131,146 @@ const AdminJobs = () => {
           variant={message.type}
           dismissible
           onClose={() => setMessage({ type: '', text: '' })}
+          className="border-0 shadow-sm mb-4"
         >
+          <i className={`bi ${message.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2`}></i>
           {message.text}
         </Alert>
       )}
 
-      <Row>
+      <Row className="g-4">
         {jobs.map((job) => (
-          <Col md={6} key={job._id} className="mb-3">
-            <Card>
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                <Badge bg="info">{job.department}</Badge>
-                <div>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEdit(job)}
-                  >
-                    Edit
+          <Col lg={6} key={job._id}>
+            <Card className="h-100 border-0 shadow-sm overflow-hidden">
+              <Card.Header className="bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <Badge bg="success-subtle" className="text-success border border-success border-opacity-25 text-uppercase ls-1 px-2 py-1 fw-bold" style={{ fontSize: '0.65rem' }}>
+                  {job.department}
+                </Badge>
+                <div className="d-flex gap-2">
+                  <Button variant="light" size="sm" className="border px-3 text-primary fw-bold" onClick={() => handleEdit(job)}>
+                    <i className="bi bi-pencil me-1"></i> Edit
                   </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDelete(job._id)}
-                  >
-                    Delete
+                  <Button variant="light" size="sm" className="border px-3 text-danger fw-bold" onClick={() => handleDelete(job._id)}>
+                    <i className="bi bi-trash me-1"></i> Delete
                   </Button>
                 </div>
               </Card.Header>
-              <Card.Body>
-                <Card.Title>{job.title}</Card.Title>
-                <Card.Text>{job.description}</Card.Text>
-                <div className="mb-2">
-                  <strong>Location:</strong> {job.location}
-                </div>
-                {job.salary && (
-                  <div className="mb-2">
-                    <strong>Salary:</strong> {job.salary}
-                  </div>
-                )}
-                <small className="text-muted">
-                  Posted: {new Date(job.createdAt).toLocaleDateString()}
-                </small>
+              <Card.Body className="p-4 d-flex flex-column">
+                <h5 className="fw-bold text-dark mb-2">{job.title}</h5>
+                <p className="text-secondary small mb-3" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  {job.description.length > 200 ? job.description.substring(0, 200) + '...' : job.description}
+                </p>
+
+                <Row className="g-2 mt-auto pt-3 border-top">
+                  <Col xs={6}>
+                    <div className="text-muted small fw-bold text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Location</div>
+                    <div className="small fw-medium text-dark"><i className="bi bi-geo-alt me-1"></i> {job.location}</div>
+                  </Col>
+                  <Col xs={6}>
+                    <div className="text-muted small fw-bold text-uppercase ls-1" style={{ fontSize: '0.65rem' }}>Salary Range</div>
+                    <div className="small fw-medium text-success fw-bold">{job.salary || 'Competitive'}</div>
+                  </Col>
+                </Row>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{editing ? 'Edit Job' : 'Post New Job'}</Modal.Title>
+      {/* JOB MODAL */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+        <Modal.Header closeButton className="bg-light py-3 border-bottom">
+          <Modal.Title className="h5 fw-bold mb-0">Record Detail Management</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Job Title *</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                required
-              />
-            </Form.Group>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Department *</Form.Label>
+          <Modal.Body className="p-4">
+            <Row className="g-3">
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Job Headline / Tender Name</Form.Label>
                   <Form.Control
                     type="text"
+                    placeholder="e.g. Senior Civil Engineer, Data Entry Operator"
+                    className="bg-light py-3 border-light shadow-inner"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Department</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g. Public Works, IT Dept"
+                    className="bg-light py-2 border-light shadow-inner"
                     value={formData.department}
-                    onChange={(e) =>
-                      setFormData({ ...formData, department: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     required
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Location *</Form.Label>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Work Location</Form.Label>
                   <Form.Control
                     type="text"
+                    placeholder="Central Zone, Sector 4, remote etc."
+                    className="bg-light py-2 border-light shadow-inner"
                     value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     required
                   />
                 </Form.Group>
               </Col>
-            </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>Salary</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.salary}
-                onChange={(e) =>
-                  setFormData({ ...formData, salary: e.target.value })
-                }
-                placeholder="e.g., ₹30,000 - ₹50,000"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Requirements</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={formData.requirements}
-                onChange={(e) =>
-                  setFormData({ ...formData, requirements: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Row>
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Description of Scope</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="Outline the responsibilities and project scope..."
+                    className="bg-light py-2 border-light shadow-inner"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+              </Col>
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Contact Email *</Form.Label>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Salary / Compensation</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g. ₹50,000 / Month"
+                    className="bg-light py-2 border-light shadow-inner"
+                    value={formData.salary}
+                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Primary Multi-media Contact</Form.Label>
                   <Form.Control
                     type="email"
+                    placeholder="Official Dept Email"
+                    className="bg-light py-2 border-light shadow-inner"
                     value={formData.contactEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactEmail: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                     required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Contact Phone</Form.Label>
-                  <Form.Control
-                    type="tel"
-                    value={formData.contactPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactPhone: e.target.value })
-                    }
                   />
                 </Form.Group>
               </Col>
             </Row>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Modal.Footer className="bg-light border-top py-3">
+            <Button variant="outline-secondary" className="px-4 fw-medium" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
-              {editing ? 'Update' : 'Post Job'}
+            <Button variant="primary" type="submit" className="px-4 fw-bold shadow-sm">
+              {editing ? 'Commit Record Changes' : 'Publish Opportunity'}
             </Button>
           </Modal.Footer>
         </Form>

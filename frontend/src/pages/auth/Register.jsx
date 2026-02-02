@@ -28,7 +28,19 @@ const Register = () => {
       return setError('Full Name should not contain numbers.');
     }
 
-    // 2. Password Validation (Symbol, Digit, Alphabet)
+    // 2. Email Validation (Format & Numeric Check)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const localPart = formData.email.split('@')[0];
+
+    if (!emailRegex.test(formData.email)) {
+      return setError('Please enter a valid email address.');
+    }
+
+    if (/^\d+$/.test(localPart)) {
+      return setError('Email username cannot be purely numeric (e.g., 1234@example.com).');
+    }
+
+    // 3. Password Validation (Symbol, Digit, Alphabet)
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/;
     if (!passwordRegex.test(formData.password)) {
       return setError('Password must contain at least one letter, one digit, and one special character.');

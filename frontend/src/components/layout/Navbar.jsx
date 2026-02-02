@@ -48,22 +48,26 @@ const Navbar = () => {
               </Nav.Link>
             )}
 
-            <Nav.Link as={Link} to="/complaints" className="fw-medium text-secondary px-3 nav-link-hover">Complaints</Nav.Link>
-            <Nav.Link as={Link} to="/bills" className="fw-medium text-secondary px-3 nav-link-hover">Bills</Nav.Link>
+            {isAuthenticated && (
+              <>
+                <Nav.Link as={Link} to="/complaints" className="fw-medium text-secondary px-3 nav-link-hover">Complaints</Nav.Link>
+                <Nav.Link as={Link} to="/bills" className="fw-medium text-secondary px-3 nav-link-hover">Bills</Nav.Link>
 
-            <Nav.Link as={Link} to="/emergency" className="fw-medium text-danger px-3 nav-link-hover">
-              <i className="bi bi-exclamation-circle-fill me-1"></i> Emergency
-            </Nav.Link>
+                <Nav.Link as={Link} to="/emergency" className="fw-medium text-danger px-3 nav-link-hover">
+                  <i className="bi bi-exclamation-circle-fill me-1"></i> Emergency
+                </Nav.Link>
 
-            {/* Chatbot Link - Visual Highlight */}
-            <Nav.Link as={Link} to="/chatbot" className="fw-medium text-secondary px-3 nav-link-hover">
-              <span className="d-flex align-items-center">
-                <i className="bi bi-robot me-1 text-info"></i> Chatbot
-              </span>
-            </Nav.Link>
+                {/* Chatbot Link - Visual Highlight */}
+                <Nav.Link as={Link} to="/chatbot" className="fw-medium text-secondary px-3 nav-link-hover">
+                  <span className="d-flex align-items-center">
+                    <i className="bi bi-robot me-1 text-info"></i> Chatbot
+                  </span>
+                </Nav.Link>
 
-            <Nav.Link as={Link} to="/announcements" className="fw-medium text-secondary px-3 nav-link-hover">Announcements</Nav.Link>
-            <Nav.Link as={Link} to="/jobs" className="fw-medium text-secondary px-3 nav-link-hover">Jobs</Nav.Link>
+                <Nav.Link as={Link} to="/announcements" className="fw-medium text-secondary px-3 nav-link-hover">Announcements</Nav.Link>
+                <Nav.Link as={Link} to="/jobs" className="fw-medium text-secondary px-3 nav-link-hover">Jobs</Nav.Link>
+              </>
+            )}
           </Nav>
 
           {/* RIGHT ACTIONS */}
@@ -98,8 +102,9 @@ const Navbar = () => {
                     <small className="text-muted text-uppercase">{user?.role}</small>
                   </div>
 
-                  <NavDropdown.Item as={Link} to="/profile"><i className="bi bi-person me-2"></i>My Profile</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/settings"><i className="bi bi-gear me-2"></i>Settings</NavDropdown.Item>
+                  <NavDropdown.Item onClick={() => navigate(user?.role === 'admin' ? '/admin' : '/citizen')}>
+                    <i className="bi bi-person-badge me-2"></i>User Profile
+                  </NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={handleLogout} className="text-danger fw-semibold">
                     <i className="bi bi-box-arrow-right me-2"></i>Sign Out

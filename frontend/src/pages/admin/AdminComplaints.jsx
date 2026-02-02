@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Table, Badge, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Container, Card, Table, Badge, Button, Modal, Form, Alert, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const AdminComplaints = () => {
   const { user } = useAuth();
@@ -51,87 +52,105 @@ const AdminComplaints = () => {
         `${API_URL}/complaints/${selectedComplaint._id}/status`,
         formData
       );
-      setMessage({ type: 'success', text: 'Complaint updated successfully!' });
+      setMessage({ type: 'success', text: 'Official record updated successfully.' });
       setShowModal(false);
       fetchComplaints();
     } catch (error) {
       setMessage({
         type: 'danger',
-        text: error.response?.data?.message || 'Failed to update complaint',
+        text: error.response?.data?.message || 'Failed to update record',
       });
     }
   };
 
   const getStatusBadge = (status) => {
-    const variants = {
-      Pending: 'warning',
-      'In Progress': 'info',
-      Resolved: 'success',
+    const configs = {
+      Pending: { bg: 'warning-subtle', text: 'warning', icon: 'bi-clock' },
+      'In Progress': { bg: 'info-subtle', text: 'info', icon: 'bi-gear-fill' },
+      Resolved: { bg: 'success-subtle', text: 'success', icon: 'bi-check-circle-fill' },
     };
-    return <Badge bg={variants[status]}>{status}</Badge>;
+    const config = configs[status] || { bg: 'secondary', text: 'white', icon: 'bi-question' };
+
+    return (
+      <Badge bg={config.bg} className={`text-${config.text} border border-${config.text} border-opacity-25 px-2 py-1 fw-bold text-uppercase ls-1`} style={{ fontSize: '0.65rem' }}>
+        <i className={`bi ${config.icon} me-1`}></i> {status}
+      </Badge>
+    );
   };
 
-  if (loading) {
-    return (
-      <Container className="mt-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </Container>
-    );
-  }
+  if (loading) return (
+    <Container className="py-5 text-center">
+      <div className="spinner-border text-primary mb-3"></div>
+      <p className="text-secondary fw-medium">Loading citizen grievances...</p>
+    </Container>
+  );
 
   return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Manage Complaints</h2>
+    <Container className="py-4" style={{ maxWidth: '1400px' }}>
+      <div className="mb-4 d-flex justify-content-between align-items-end">
+        <div>
+          <h2 className="fw-bold text-dark mb-1">Grievance Management</h2>
+          <p className="text-secondary small mb-0">Centralized log of all citizen-reported civic issues requiring administrative action.</p>
+        </div>
+        <div className="font-mono small text-muted">
+          Total Records: <span className="fw-bold text-primary">{complaints.length}</span>
+        </div>
+      </div>
+
       {message.text && (
         <Alert
           variant={message.type}
           dismissible
           onClose={() => setMessage({ type: '', text: '' })}
+          className="border-0 shadow-sm mb-4"
         >
+          <i className={`bi ${message.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2`}></i>
           {message.text}
         </Alert>
       )}
 
-      <Card>
-        <Card.Body>
-          <Table responsive>
-            <thead>
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <Card.Body className="p-0">
+          <Table responsive hover className="mb-0 align-middle">
+            <thead className="bg-light border-bottom text-uppercase small ls-1 fw-bold text-secondary">
               <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Location</th>
-                <th>Citizen</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Action</th>
+                <th className="px-4 py-3">Subject</th>
+                <th className="py-3">Reporting Citizen</th>
+                <th className="py-3">Category / Location</th>
+                <th className="py-3 text-center">Status</th>
+                <th className="py-3 px-4 text-end">Management</th>
               </tr>
             </thead>
             <tbody>
               {complaints.map((complaint) => (
-                <tr key={complaint._id}>
-                  <td>{complaint.title}</td>
-                  <td>{complaint.category}</td>
-                  <td>{complaint.location}</td>
-                  <td>
-                    {complaint.userId?.name || 'N/A'}
-                    <br />
-                    <small className="text-muted">
-                      {complaint.userId?.email}
-                    </small>
+                <tr key={complaint._id} className="border-bottom">
+                  <td className="px-4 py-3">
+                    <div className="fw-bold text-dark">{complaint.title}</div>
+                    <div className="text-muted small text-truncate" style={{ maxWidth: '300px' }}>
+                      ID: {complaint._id.slice(-8).toUpperCase()}
+                    </div>
                   </td>
-                  <td>{getStatusBadge(complaint.status)}</td>
-                  <td>{new Date(complaint.createdAt).toLocaleDateString()}</td>
-                  <td>
+                  <td className="py-3">
+                    <div className="fw-medium text-dark">{complaint.userId?.name || 'N/A'}</div>
+                    <div className="text-muted small">{complaint.userId?.email}</div>
+                  </td>
+                  <td className="py-3">
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                      <Badge bg="light" text="secondary" className="border fw-normal">{complaint.category}</Badge>
+                    </div>
+                    <div className="text-muted small"><i className="bi bi-geo-alt me-1"></i> {complaint.location}</div>
+                  </td>
+                  <td className="py-3 text-center">
+                    {getStatusBadge(complaint.status)}
+                  </td>
+                  <td className="py-3 px-4 text-end">
                     <Button
-                      variant="primary"
+                      variant="light"
                       size="sm"
+                      className="border fw-bold px-3 text-primary"
                       onClick={() => handleUpdate(complaint)}
                     >
-                      Update
+                      Take Action
                     </Button>
                   </td>
                 </tr>
@@ -141,71 +160,82 @@ const AdminComplaints = () => {
         </Card.Body>
       </Card>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Update Complaint Status</Modal.Title>
+      {/* ACTION MODAL */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+        <Modal.Header closeButton className="bg-light py-3 border-bottom">
+          <Modal.Title className="h5 fw-bold mb-0">Record Management Dashboard</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleSubmit}>
-          <Modal.Body>
+          <Modal.Body className="p-4">
             {selectedComplaint && (
-              <div className="mb-3">
-                <h5>{selectedComplaint.title}</h5>
-                <p>{selectedComplaint.description}</p>
-                <p>
-                  <strong>Category:</strong> {selectedComplaint.category}
-                </p>
-                <p>
-                  <strong>Location:</strong> {selectedComplaint.location}
-                </p>
+              <div className="bg-light p-3 rounded-3 mb-4 border">
+                <Row className="g-3">
+                  <Col md={12}>
+                    <label className="text-muted small fw-bold text-uppercase ls-1 d-block mb-1">Incident Detail</label>
+                    <div className="fw-bold h6 mb-1 text-primary">{selectedComplaint.title}</div>
+                    <p className="text-secondary small mb-0">{selectedComplaint.description}</p>
+                  </Col>
+                  <Col md={6}>
+                    <label className="text-muted small fw-bold text-uppercase ls-1 d-block mb-1">Reporter</label>
+                    <div className="small fw-medium">{selectedComplaint.userId?.name} ({selectedComplaint.userId?.email})</div>
+                  </Col>
+                  <Col md={6}>
+                    <label className="text-muted small fw-bold text-uppercase ls-1 d-block mb-1">Date Logged</label>
+                    <div className="small fw-medium">{new Date(selectedComplaint.createdAt).toLocaleString()}</div>
+                  </Col>
+                </Row>
               </div>
             )}
-            <Form.Group className="mb-3">
-              <Form.Label>Status</Form.Label>
-              <Form.Select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
-                }
-                required
-              >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Assign Department</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter department name"
-                value={formData.assignedDepartment}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    assignedDepartment: e.target.value,
-                  })
-                }
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Admin Remarks</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter remarks or notes"
-                value={formData.adminRemarks}
-                onChange={(e) =>
-                  setFormData({ ...formData, adminRemarks: e.target.value })
-                }
-              />
-            </Form.Group>
+
+            <Row className="g-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Update Status</Form.Label>
+                  <Form.Select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="py-2 bg-white border-subtle"
+                    required
+                  >
+                    <option value="Pending">Pending Review</option>
+                    <option value="In Progress">Investigation In Progress</option>
+                    <option value="Resolved">Resolution Completed</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Assign to Department</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g. Civil Works, PWD, Health"
+                    value={formData.assignedDepartment}
+                    className="py-2 bg-white border-subtle"
+                    onChange={(e) => setFormData({ ...formData, assignedDepartment: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={12}>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-secondary text-uppercase ls-1">Official Administrator Remarks</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="Provide specific details about the action taken or next steps..."
+                    value={formData.adminRemarks}
+                    className="py-2 bg-white border-subtle"
+                    onChange={(e) => setFormData({ ...formData, adminRemarks: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Modal.Footer className="bg-light border-top py-3">
+            <Button variant="outline-secondary" className="px-4 fw-medium" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
-              Update Status
+            <Button variant="primary" type="submit" className="px-4 fw-bold shadow-sm">
+              Commit Record Update
             </Button>
           </Modal.Footer>
         </Form>

@@ -1,228 +1,116 @@
 /* 
   =============================================================================
-  CITY CONNECT - URBAN SMART CITY THEME
-  Theme: "Civic Logic" (Vibrant Blue, Concrete Grey, Signal Colors)
+  CITY CONNECT - OFFICIAL GOVERNMENT PORTAL THEME
+  Theme: "Trustworthy Civic" (Institutional Blue, Clear Contrast, Grid Order)
   =============================================================================
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* CITY PALETTE */
+  /* INSTITUTIONAL PALETTE */
   --color-brand-blue: #0284c7;
-  /* Sky 600 - The "Smart City" Blue */
+  /* Primary Official Blue */
   --color-brand-dark: #075985;
-  /* Sky 800 */
-  --color-brand-light: #e0f2fe;
-  /* Sky 100 */
+  /* Deep Institutional Blue */
+  --color-brand-light: #f0f9ff;
+  /* Very Light Background */
 
-  --color-concrete: #64748b;
-  /* Slate 500 */
-  --color-asphalt: #0f172a;
-  /* Slate 900 */
-  --color-sidewalk: #f8fafc;
-  /* Slate 50 */
+  --color-slate-500: #64748b;
+  --color-slate-900: #0f172a;
+  --color-white: #ffffff;
 
   /* SEMANTIC MAPPING */
   --color-primary: var(--color-brand-blue);
   --color-primary-hover: var(--color-brand-dark);
-
-  --color-surface: #ffffff;
-  --color-surface-subtle: var(--color-sidewalk);
+  --color-surface: var(--color-white);
+  --color-surface-subtle: #f8fafc;
   --border-subtle: #e2e8f0;
-  /* Slate 200 */
 
   /* TEXT */
-  --text-main: var(--color-asphalt);
-  --text-muted: var(--color-concrete);
+  --text-main: var(--color-slate-900);
+  --text-muted: var(--color-slate-500);
 
   /* TYPEFACES */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  --font-mono: 'JetBrains Mono', monospace;
 
-  /* SHADOWS - Clean & Professional */
-  --shadow-subtle: 0 1px 2px 0 rgba(7, 89, 133, 0.05);
-  /* Blue-tinted shadow */
-  --shadow-card: 0 4px 6px -1px rgba(7, 89, 133, 0.1), 0 2px 4px -2px rgba(7, 89, 133, 0.05);
-  --shadow-float: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  /* SHADOWS */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-subtle);
   color: var(--text-main);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--color-asphalt);
-}
-
-/* LAYOUT UTILITIES */
+/* OFFSET FOR FIXED NAVBAR */
 .main-content {
   padding-top: 100px;
-  /* Fixed Navbar Offset (80px + 20px buffer) */
   min-height: 80vh;
 }
 
-/* UTILITY CLASSES */
-.font-mono {
-  font-family: var(--font-mono);
+/* TYPOGRAPHY */
+.ls-1 {
+  letter-spacing: 0.025em;
 }
 
-.tracking-tight {
-  letter-spacing: -0.02em;
+.ls-2 {
+  letter-spacing: 0.1em;
 }
 
-.tracking-tighter {
-  letter-spacing: -0.04em;
+/* REUSABLE UTILITIES */
+.shadow-inner {
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
 }
 
-.text-primary {
-  color: var(--color-brand-blue) !important;
+.bg-light {
+  background-color: #f8fafc !important;
 }
 
-.bg-primary {
-  background-color: var(--color-brand-blue) !important;
-}
-
-/* BENTO GRID UTILITIES (Preserved) */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .bento-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 992px) {
-  .bento-grid {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(2, minmax(240px, auto));
-  }
-
-  .col-span-2 {
-    grid-column: span 2;
-  }
-
-  .row-span-2 {
-    grid-row: span 2;
-  }
-}
-
-/* BENTO CARD - City Theme */
-.bento-card {
-  background: var(--color-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  overflow: hidden;
-  position: relative;
-  transition: all 0.2s ease-out;
-  display: flex;
-  flex-direction: column;
-}
-
-.bento-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
-  border-color: var(--color-brand-blue);
-  /* Highlights in Blue */
-  z-index: 10;
-}
-
-/* LIVE TICKER - City Theme */
-.ticker-wrap {
-  width: 100%;
-  overflow: hidden;
-  background-color: var(--color-brand-light);
-  /* Light Blue Background */
-  border-bottom: 1px solid var(--color-brand-blue);
-  white-space: nowrap;
-  box-sizing: border-box;
-}
-
-.ticker {
-  display: inline-block;
-  padding-left: 100%;
-  animation: ticker 60s linear infinite;
-}
-
-.ticker__item {
-  display: inline-block;
-  padding: 0 2rem;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--color-brand-dark);
-  /* Dark Blue Text */
-}
-
-@keyframes ticker {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-
-  100% {
-    transform: translate3d(-100%, 0, 0);
-  }
-}
-
-/* BUTTONS - City Theme */
-.btn-primary {
-  background: var(--color-brand-blue);
-  border: 1px solid var(--color-brand-blue);
-  border-radius: 6px;
-  /* Slightly sharper for functional look */
-  padding: 0.75rem 1.5rem;
+/* TABLE CUSTOMIZATION */
+.table thead th {
+  background-color: #f8fafc;
+  color: #64748b;
   font-weight: 600;
-  color: white;
-  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f0f9ff;
+}
+
+/* BUTTONS */
+.btn-primary {
+  background-color: var(--color-brand-blue);
+  border-color: var(--color-brand-blue);
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: var(--color-brand-dark);
+  background-color: var(--color-brand-dark);
   border-color: var(--color-brand-dark);
   transform: translateY(-1px);
 }
 
-.btn-outline-primary {
-  color: var(--color-brand-blue);
-  border-color: var(--color-brand-blue);
-  background: transparent;
+/* CUSTOM BREADCRUMB */
+.breadcrumb-item+.breadcrumb-item::before {
+  content: "→";
+  color: #94a3b8;
 }
 
-.btn-outline-primary:hover {
-  background-color: var(--color-brand-light);
-  color: var(--color-brand-dark);
-}
-
-/* CUSTOM SCROLLBAR */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #fff;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-brand-blue);
-  /* Blue Scrollbar */
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-dark);
+/* ANNOUNCEMENT CARD SPECIFIC */
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md) !important;
+  transition: all 0.3s ease;
 }

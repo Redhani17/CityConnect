@@ -1,91 +1,21 @@
-// Rule-based Chatbot Controller
+import crypto from 'crypto';
 
-const faqDatabase = {
-  greetings: {
-    patterns: ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening'],
-    responses: [
-      'Hello! How can I help you today?',
-      'Hi there! What can I assist you with?',
-      'Greetings! I\'m here to help with city services.',
-    ],
-  },
-  complaints: {
-    patterns: ['complaint', 'file complaint', 'submit complaint', 'report issue', 'problem'],
-    responses: [
-      'You can submit a complaint by going to the Complaints section. Click on "Submit New Complaint" and fill in the details.',
-      'To file a complaint, navigate to Complaints → Submit New Complaint. Provide title, description, category, and location.',
-    ],
-  },
-  bills: {
-    patterns: ['bill', 'payment', 'pay bill', 'electricity', 'water', 'property tax', 'due date'],
-    responses: [
-      'You can view and pay your bills in the Bills section. All pending bills will be shown there.',
-      'Go to the Bills section to see your electricity, water, and property tax bills. You can pay them directly from there.',
-    ],
-  },
-  emergency: {
-    patterns: ['emergency', 'sos', 'help', 'urgent', 'accident'],
-    responses: [
-      'For emergencies, use the SOS button in the Emergency Services section. You can also call 108 for immediate help.',
-      'In case of emergency, click the SOS button or call the emergency helpline at 108.',
-    ],
-  },
-  jobs: {
-    patterns: ['job', 'employment', 'opportunity', 'vacancy', 'career', 'apply'],
-    responses: [
-      'Check the Jobs & Opportunities section to see available positions posted by the city administration.',
-      'Visit the Jobs section to browse local job opportunities and contact information.',
-    ],
-  },
-  announcements: {
-    patterns: ['announcement', 'event', 'news', 'update', 'notice'],
-    responses: [
-      'City announcements and events are available in the Announcements section. Check there for the latest updates.',
-      'Go to Announcements to see city events, notices, and important updates.',
-    ],
-  },
-  default: {
-    responses: [
-      'I can help you with complaints, bills, emergencies, jobs, and announcements. What would you like to know?',
-      'I\'m here to assist with city services. You can ask about complaints, bill payments, emergency services, jobs, or announcements.',
-      'How can I help you today? I can provide information about city services, complaints, bills, and more.',
-    ],
-  },
-};
+const GROQ_CHAT_COMPLETIONS_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-// Find matching intent
-const findIntent = (message) => {
-  const lowerMessage = message.toLowerCase();
-  
-  for (const [intent, data] of Object.entries(faqDatabase)) {
-    if (intent === 'default') continue;
-    
-    for (const pattern of data.patterns) {
-      if (lowerMessage.includes(pattern)) {
-        return intent;
-      }
-    }
-  }
-  
-  return 'default';
-};
-
-// Get response
-const getResponse = (intent) => {
-  const intentData = faqDatabase[intent];
-  if (intentData && intentData.responses) {
-        const responses = intentData.responses;
-        return responses[Math.floor(Math.random() * responses.length)];
-  }
-  return faqDatabase.default.responses[
-    Math.floor(Math.random() * faqDatabase.default.responses.length)
-  ];
-};
-
-// Chat endpoint
+/**
+ * Chat endpoint using Groq AI
+ * POST /api/chatbot/chat
+ */
 export const chat = async (req, res) => {
   try {
     const { message } = req.body;
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'GROQ_API_KEY is not configured on the server.',
+      });
+    }
 
     if (!message || message.trim().length === 0) {
       return res.status(400).json({
@@ -94,26 +24,71 @@ export const chat = async (req, res) => {
       });
     }
 
-    const intent = findIntent(message);
-    const response = getResponse(intent);
+    const requestId = crypto.randomUUID();
 
-    res.json({
+    const groqResponse = await fetch(GROQ_CHAT_COMPLETIONS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
+        temperature: 0.4,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are CityConnect AI Assistant. Help users with city services like complaints, bills, emergencies, announcements, and jobs. Be concise, professional, and practical. If asked about something unrelated to city services, politely steer the conversation back to how you can help with city matters.',
+          },
+          { role: 'user', content: message },
+        ],
+      }),
+    });
+
+    const payload = await groqResponse.json().catch(() => null);
+
+    if (!groqResponse.ok) {
+      return res.status(502).json({
+        success: false,
+        message: payload?.error?.message || 'Groq request failed',
+        error: payload || { status: groqResponse.status },
+        requestId,
+      });
+    }
+
+    const assistantMessage = payload?.choices?.[0]?.message?.content;
+
+    if (!assistantMessage) {
+      return res.status(502).json({
+        success: false,
+        message: 'Groq response was missing assistant content',
+        error: payload,
+        requestId,
+      });
+    }
+
+    return res.json({
       success: true,
       data: {
-        message: response,
-        intent: intent,
+        message: assistantMessage,
       },
+      requestId,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error('Groq Chatbot Error:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Chatbot error',
+      message: 'Groq chatbot error',
       error: error.message,
     });
   }
 };
 
-// Get FAQ suggestions
+/**
+ * Get FAQ suggestions for the UI
+ * GET /api/chatbot/suggestions
+ */
 export const getFAQSuggestions = async (req, res) => {
   try {
     const suggestions = [

@@ -98,43 +98,6 @@ const LandingPage = () => {
                 </Container>
             </section>
 
-            {/* 3. NEWS & UPDATES (Simplified) */}
-            <section className="py-5 bg-white border-top">
-                <Container>
-                    <Row className="align-items-center mb-4">
-                        <Col>
-                            <h3 className="fw-bold text-dark mb-0">Latest Updates</h3>
-                        </Col>
-                        <Col className="text-end">
-                            <Link to="/announcements" className="text-decoration-none fw-bold">View all news &rarr;</Link>
-                        </Col>
-                    </Row>
-
-                    <Row className="g-4">
-                        <Col md={4}>
-                            <div className="border-start border-4 border-primary ps-3 py-1">
-                                <small className="text-muted d-block mb-1">Oct 24, 2026</small>
-                                <Link to="/announcements" className="fw-bold text-dark text-decoration-none d-block mb-1">Main Street Maintenance Schedule</Link>
-                                <p className="small text-secondary mb-0">Road closure expected from 10 AM to 4 PM.</p>
-                            </div>
-                        </Col>
-                        <Col md={4}>
-                            <div className="border-start border-4 border-success ps-3 py-1">
-                                <small className="text-muted d-block mb-1">Oct 22, 2026</small>
-                                <Link to="/announcements" className="fw-bold text-dark text-decoration-none d-block mb-1">New Recycling Guidelines</Link>
-                                <p className="small text-secondary mb-0">Updated waste segregation rules effective next month.</p>
-                            </div>
-                        </Col>
-                        <Col md={4}>
-                            <div className="border-start border-4 border-warning ps-3 py-1">
-                                <small className="text-muted d-block mb-1">Oct 20, 2026</small>
-                                <Link to="/announcements" className="fw-bold text-dark text-decoration-none d-block mb-1">Health Camp @ City Hall</Link>
-                                <p className="small text-secondary mb-0">Free checkups available for senior citizens.</p>
-                            </div>
-                        </Col>
-                    </Row>
-                </Container>
-            </section>
 
             {/* 4. HELP SECTION */}
             <section className="py-5 bg-primary text-white">

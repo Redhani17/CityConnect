@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap';
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Row, Col, Card, Button, Alert, Badge, ProgressBar } from 'react-bootstrap';
 import axios from 'axios';
 
 const Emergency = () => {
   const [sosSent, setSosSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState([]);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [isPressing, setIsPressing] = useState(false);
+  const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const HOLD_DURATION = 5000; // 5 seconds
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -20,20 +26,59 @@ const Emergency = () => {
     fetchContacts();
   }, []);
 
-  const handleSOS = async () => {
+  // Long-press logic
+  const startPress = () => {
+    if (sosSent || loading) return;
+    setIsPressing(true);
+    setHoldProgress(0);
+    startTimeRef.current = Date.now();
+
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const progress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
+      setHoldProgress(progress);
+
+      if (elapsed >= HOLD_DURATION) {
+        clearInterval(timerRef.current);
+        triggerEmergency();
+      }
+    }, 50);
+  };
+
+  const endPress = () => {
+    setIsPressing(false);
+    clearInterval(timerRef.current);
+    if (holdProgress < 100) {
+      setHoldProgress(0);
+    }
+  };
+
+  const triggerEmergency = async () => {
     setLoading(true);
     try {
+      // 1. Send system SOS alert
       await axios.post(`${API_URL}/emergency/sos`, {
         location: 'Current Location',
-        emergencyType: 'General Emergency',
-        message: 'SOS Request',
+        emergencyType: 'Critical SOS',
+        message: 'Immediate assistance requested via 5s hold.',
       });
+
+      // 2. Initiate Twilio call to user specified number
+      await axios.post(`${API_URL}/twilio/call`, {
+        phoneNumber: '8012537771'
+      });
+
       setSosSent(true);
-      setTimeout(() => setSosSent(false), 8000);
+      setTimeout(() => {
+        setSosSent(false);
+        setHoldProgress(0);
+      }, 10000);
     } catch (error) {
-      console.error('Failed to send SOS:', error);
+      console.error('Failed to trigger emergency:', error);
+      alert('Emergency trigger failed. Please call 108 immediately.');
     } finally {
       setLoading(false);
+      setIsPressing(false);
     }
   };
 
@@ -53,29 +98,56 @@ const Emergency = () => {
             <Card.Body className="d-flex flex-column align-items-center justify-content-center py-5">
               <h3 className="fw-bold text-dark mb-4">Request Immediate Help</h3>
 
-              {sosSent ? (
-                <div className="text-success animate-pulse">
-                  <i className="bi bi-check-circle-fill display-1"></i>
-                  <h4 className="mt-3 fw-bold">SOS SENT</h4>
-                  <p>Help is on the way!</p>
-                </div>
-              ) : (
+              <div className="position-relative mb-4" style={{ width: '200px', height: '200px' }}>
+                {/* Progress Ring Background */}
+                <svg className="position-absolute top-0 left-0" width="200" height="200" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="90" fill="none" stroke="#e9ecef" strokeWidth="8" />
+                  <circle
+                    cx="100" cy="100" r="90" fill="none"
+                    stroke={sosSent ? "#198754" : "#dc3545"}
+                    strokeWidth="8"
+                    strokeDasharray="565.48"
+                    strokeDashoffset={565.48 - (565.48 * holdProgress) / 100}
+                    style={{ transition: 'stroke-dashoffset 0.1s linear, stroke 0.3s ease' }}
+                    transform="rotate(-90 100 100)"
+                  />
+                </svg>
+
                 <Button
-                  variant="danger"
-                  className="rounded-circle shadow-lg d-flex flex-column align-items-center justify-content-center mb-3"
-                  style={{ width: '180px', height: '180px', border: '8px solid rgba(255,255,255,0.3)' }}
-                  onClick={handleSOS}
+                  variant={sosSent ? "success" : "danger"}
+                  className={`rounded-circle shadow-lg d-flex flex-column align-items-center justify-content-center position-absolute top-50 start-50 translate-middle ${isPressing ? 'scale-95' : ''}`}
+                  style={{
+                    width: '160px',
+                    height: '160px',
+                    border: 'none',
+                    transition: 'all 0.3s ease',
+                    backgroundColor: sosSent ? '#198754' : '#dc3545'
+                  }}
+                  onMouseDown={startPress}
+                  onMouseUp={endPress}
+                  onMouseLeave={endPress}
+                  onTouchStart={startPress}
+                  onTouchEnd={endPress}
                   disabled={loading}
                 >
                   {loading ? <span className="spinner-border"></span> : (
                     <>
-                      <i className="bi bi-broadcast fs-1"></i>
-                      <span className="fs-3 fw-bold mt-1">SOS</span>
+                      <i className={`bi ${sosSent ? 'bi-check-lg' : 'bi-broadcast'} fs-1`}></i>
+                      <span className="fs-3 fw-bold mt-1">{sosSent ? 'SENT' : 'SOS'}</span>
                     </>
                   )}
                 </Button>
-              )}
-              <p className="text-muted small mt-2">Press button to share location with authorities</p>
+              </div>
+
+              <div className="text-muted small mt-2 px-3">
+                {sosSent ? (
+                  <span className="text-success fw-bold">HELP IS ON THE WAY! A call has been placed.</span>
+                ) : isPressing ? (
+                  <span className="text-primary fw-bold">HOLDING... DON'T RELEASE ({Math.ceil((HOLD_DURATION - (holdProgress * HOLD_DURATION) / 100) / 1000)}s)</span>
+                ) : (
+                  "Hold button for 5 seconds to initiate emergency call"
+                )}
+              </div>
             </Card.Body>
           </Card>
         </Col>
@@ -105,26 +177,6 @@ const Emergency = () => {
                 </Card>
               </a>
             ))}
-
-            {/* Static Fallback if empty */}
-            {contacts.length === 0 && (
-              <>
-                <Card className="border">
-                  <Card.Body className="p-3 d-flex align-items-center">
-                    <i className="bi bi-shield-shaded fs-3 text-primary me-3"></i>
-                    <div><h6 className="fw-bold mb-0">Police Control Room</h6><small>General Help</small></div>
-                    <Badge bg="primary" className="ms-auto fs-6">100</Badge>
-                  </Card.Body>
-                </Card>
-                <Card className="border">
-                  <Card.Body className="p-3 d-flex align-items-center">
-                    <i className="bi bi-fire fs-3 text-danger me-3"></i>
-                    <div><h6 className="fw-bold mb-0">Fire & Rescue</h6><small>Immediate Response</small></div>
-                    <Badge bg="danger" className="ms-auto fs-6">101</Badge>
-                  </Card.Body>
-                </Card>
-              </>
-            )}
           </div>
         </Col>
       </Row>

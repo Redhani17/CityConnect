@@ -157,7 +157,7 @@ const AdminDashboard = () => {
             </Card.Header>
             <Card.Body className="p-4">
               <Row className="g-3">
-                <Col md={3}>
+                <Col md={4}>
                   <Button as={Link} to="/admin/complaints" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
                     <i className="bi bi-chat-left-dots fs-4 me-3 text-primary"></i>
                     <div>
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
                     </div>
                   </Button>
                 </Col>
-                <Col md={3}>
+                <Col md={4}>
                   <Button as={Link} to="/admin/announcements" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
                     <i className="bi bi-megaphone fs-4 me-3 text-info"></i>
                     <div>
@@ -175,21 +175,12 @@ const AdminDashboard = () => {
                     </div>
                   </Button>
                 </Col>
-                <Col md={3}>
+                <Col md={4}>
                   <Button as={Link} to="/admin/jobs" variant="light" className="w-100 py-3 border text-start d-flex align-items-center">
                     <i className="bi bi-people fs-4 me-3 text-success"></i>
                     <div>
                       <div className="fw-bold small">Jobs & Tenders</div>
                       <div className="text-muted small" style={{ fontSize: '0.7rem' }}>Employment Board</div>
-                    </div>
-                  </Button>
-                </Col>
-                <Col md={3}>
-                  <Button variant="light" className="w-100 py-3 border text-start d-flex align-items-center opacity-50 pe-none">
-                    <i className="bi bi-shield-lock fs-4 me-3 text-danger"></i>
-                    <div>
-                      <div className="fw-bold small">System Audit</div>
-                      <div className="text-muted small" style={{ fontSize: '0.7rem' }}>Security Logs (Dev)</div>
                     </div>
                   </Button>
                 </Col>

@@ -200,9 +200,6 @@ const Announcements = () => {
                         <i className="bi bi-geo-alt me-1"></i>
                         {item.location || 'Multiple Zones'}
                       </div>
-                      <button className="btn btn-link btn-sm text-primary fw-bold text-decoration-none p-0">
-                        Read Details <i className="bi bi-arrow-right small"></i>
-                      </button>
                     </div>
                   </Card.Body>
                 </Card>
